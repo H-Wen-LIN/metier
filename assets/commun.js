@@ -205,12 +205,53 @@ function flottantes(id, lignes) {
    ============================================================ */
 const cochees = sel => new Set([...document.querySelectorAll(sel + " input:checked")].map(i => i.value));
 function etatFiltres() {
-  return { metiers: cochees("#metiers"), contrats: cochees("#f-contrats"), niveaux: cochees("#f-niveaux") };
+  return { metiers: cochees("#metiers"), contrats: cochees("#f-contrats"), niveaux: cochees("#f-niveaux"), qualite: cochees("#f-qualite") };
 }
-/* Les offres retenues par les trois filtres. */
+
+/* Qualité des annonces : des critères d'exclusion, tous décochés par défaut.
+   Cocher un critère écarte les offres qui le remplissent ; les chiffres décrivent
+   alors les annonces complètes, plus le marché entier. [groupe, [clé, libellé, règle]…] */
+const QUALITE = [
+  ["Salaire", [
+    ["sans-salaire", "Sans salaire affiché", o => !o.salaire],
+    ["salaire-faux", "Salaire invraisemblable", o => !!o.salaire && o.smin == null],
+  ]],
+  ["Doublons et ancienneté", [
+    ["doublon", "Doublons probables", o => !!o._doublon],
+    ["ancienne", "Publiée il y a plus de 90 jours", o => { const a = age(o); return a != null && a > 90; }],
+  ]],
+  ["Informations manquantes", [
+    ["sans-entreprise", "Entreprise non nommée", o => !o.entreprise],
+    ["exp-floue", "Expérience exigée, sans durée", o => o.exp_exige === "E" && o.exp_ans == null],
+    ["sans-position", "Sans position sur la carte", o => o.lat == null],
+  ]],
+];
+const REGLES_QUALITE = Object.fromEntries(QUALITE.flatMap(([, cs]) => cs.map(([k, , r]) => [k, r])));
+// « Annonces complètes » : les quatre critères qui touchent le salaire, les doublons et l'employeur.
+const QUALITE_COMPLETES = ["sans-salaire", "salaire-faux", "doublon", "sans-entreprise"];
+const ecartee = (o, qualite) => [...qualite].some(k => REGLES_QUALITE[k] && REGLES_QUALITE[k](o));
+
+/* Doublon probable : même intitulé, même entreprise, même lieu qu'une autre offre active.
+   Dans chaque groupe, la plus récente reste ; les autres sont marquées _doublon. */
+function marquerDoublons(offres) {
+  const groupes = new Map();
+  offres.forEach(o => {
+    const cle = [(o.intitule || "").toLowerCase().replace(/\s+/g, " ").trim(),
+                 (o.entreprise || "").toLowerCase().trim(), o.lieu || ""].join("|");
+    if (!groupes.has(cle)) groupes.set(cle, []);
+    groupes.get(cle).push(o);
+  });
+  groupes.forEach(g => {
+    g.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    g.forEach((o, i) => { o._doublon = i > 0; });
+  });
+}
+
+/* Les offres retenues par les quatre filtres. */
 function filtrer(f) {
   f = f || etatFiltres();
-  return D.offres.filter(o => f.metiers.has(o.rome) && f.contrats.has(familleContrat(o)) && f.niveaux.has(niv(o)));
+  return D.offres.filter(o => f.metiers.has(o.rome) && f.contrats.has(familleContrat(o)) && f.niveaux.has(niv(o))
+    && !ecartee(o, f.qualite));
 }
 
 /* ============================================================
@@ -246,6 +287,15 @@ const HTML_FILTRES = `
       <div class="cases" id="f-niveaux"></div>
       <p class="note" style="margin:8px 0 0">Déduit de l'intitulé de l'annonce. Ces couleurs servent de repère dans toute la page.</p>
     </div>
+    <div>
+      <h3>Qualité des annonces</h3>
+      <div class="cases qualite" id="f-qualite"></div>
+      <div class="boutons" id="boutons-qualite">
+        <button data-qualite="completes">Annonces complètes</button>
+        <button data-qualite="aucun">Tout garder</button>
+      </div>
+      <p class="note" style="margin:8px 0 0">Cocher un critère écarte ces offres : les chiffres décrivent alors les annonces complètes, plus tout le marché.</p>
+    </div>
   </div>
   <p class="compte" id="compte"></p>`;
 
@@ -260,7 +310,7 @@ function poserNavEtFiltres() {
     ? `<div class="carte">${HTML_FILTRES}</div>`
     // Ailleurs : replié, on vient lire une page, pas refaire ses filtres.
     : `<details class="carte"><summary id="resume-filtres">Filtres</summary>${HTML_FILTRES}</details>`)
-    + `<div class="vide" id="aucune" hidden>Aucune offre ne correspond à ces filtres. Recochez un métier, un type de contrat ou un niveau de poste.</div>`;
+    + `<div class="vide" id="aucune" hidden>Aucune offre ne correspond à ces filtres. Recochez un métier, un type de contrat ou un niveau de poste, ou décochez un critère de qualité.</div>`;
 
   const p = document.getElementById("pied");
   if (p) p.innerHTML =
@@ -291,16 +341,22 @@ const Commun = {
     // Compteurs dans les cases de filtre + ligne de synthèse
     CONTRATS.forEach(([k]) => { const e = document.getElementById("nb-c-" + k); if (e) e.textContent = parMetier.filter(o => familleContrat(o) === k).length; });
     NIVEAUX.forEach(([k]) => { const e = document.getElementById("nb-n-" + k); if (e) e.textContent = parMetier.filter(o => niv(o) === k).length; });
-    document.getElementById("compte").innerHTML = `<b>${n}</b> offre${n > 1 ? "s" : ""} sélectionnée${n > 1 ? "s" : ""} sur ${total} — ${f.metiers.size} métier${f.metiers.size > 1 ? "s" : ""} coché${f.metiers.size > 1 ? "s" : ""}.`;
+    // Qualité : combien d'offres chaque critère écarte parmi celles des trois autres filtres.
+    const avantQualite = parMetier.filter(o => f.contrats.has(familleContrat(o)) && f.niveaux.has(niv(o)));
+    Object.entries(REGLES_QUALITE).forEach(([k, r]) => { const e = document.getElementById("nb-q-" + k); if (e) e.textContent = avantQualite.filter(r).length; });
+    const nEcartees = avantQualite.length - n;
+    document.getElementById("compte").innerHTML = `<b>${n}</b> offre${n > 1 ? "s" : ""} sélectionnée${n > 1 ? "s" : ""} sur ${total} — ${f.metiers.size} métier${f.metiers.size > 1 ? "s" : ""} coché${f.metiers.size > 1 ? "s" : ""}`
+      + (f.qualite.size ? `, dont <b>${nEcartees}</b> écartée${nEcartees > 1 ? "s" : ""} pour qualité (${f.qualite.size} critère${f.qualite.size > 1 ? "s" : ""}).` : ".");
     document.getElementById("aucune").hidden = n > 0;
     const resume = document.getElementById("resume-filtres");
-    if (resume) resume.textContent = `Filtres (${f.metiers.size} métier${f.metiers.size > 1 ? "s" : ""}, ${n} offre${n > 1 ? "s" : ""})`;
+    if (resume) resume.textContent = `Filtres (${f.metiers.size} métier${f.metiers.size > 1 ? "s" : ""}, ${n} offre${n > 1 ? "s" : ""}`
+      + (f.qualite.size ? `, ${nEcartees} écartée${nEcartees > 1 ? "s" : ""} pour qualité)` : ")");
     // Plus rien de sélectionné : le message dit « recochez un métier », le panneau replié
     // doit donc s'ouvrir. Sinon la page réclame une action dont elle cache les cases.
     if (n === 0) { const d = document.querySelector("details.carte"); if (d) d.open = true; }
 
-    // Mémorisation des trois filtres ensemble : ils suivent d'une page à l'autre.
-    try { localStorage.setItem("metiers-filtres", JSON.stringify({ metiers: [...f.metiers], contrats: [...f.contrats], niveaux: [...f.niveaux] })); } catch (e) {}
+    // Mémorisation des quatre filtres ensemble : ils suivent d'une page à l'autre.
+    try { localStorage.setItem("metiers-filtres", JSON.stringify({ metiers: [...f.metiers], contrats: [...f.contrats], niveaux: [...f.niveaux], qualite: [...f.qualite] })); } catch (e) {}
 
     Commun.rendre(offres, D);
   },
@@ -316,6 +372,7 @@ const Commun = {
       D = d;
       Commun.D = d;
       Commun.lib = Object.fromEntries(d.metiers.map(m => [m.code, m]));
+      marquerDoublons(d.offres);
       if (Array.isArray(d.niveaux) && d.niveaux.length) NIVEAUX = d.niveaux.filter(x => Array.isArray(x) && x.length === 2);
       if (Array.isArray(d.formations) && d.formations.length) FORMATIONS = d.formations;
 
@@ -347,7 +404,7 @@ const Commun = {
         majGroupes(); Commun.rafraichir();
       }));
       document.getElementById("metiers").addEventListener("change", () => { majGroupes(); Commun.rafraichir(); });
-      document.querySelectorAll(".boutons button").forEach(b => b.addEventListener("click", () => {
+      document.querySelectorAll(".boutons button[data-groupe]").forEach(b => b.addEventListener("click", () => {
         document.querySelectorAll("#metiers input").forEach(i => { i.checked = b.dataset.groupe === "tous"; });
         majGroupes(); Commun.rafraichir();
       }));
@@ -363,6 +420,16 @@ const Commun = {
         `<label><input type="checkbox" value="${k}" ${memoN.includes(k) ? "checked" : ""}> <i class="pastille" style="background:${COUL_NIV[k]}"></i> ${l} <small id="nb-n-${k}"></small></label>`).join("");
       document.getElementById("f-contrats").addEventListener("change", Commun.rafraichir);
       document.getElementById("f-niveaux").addEventListener("change", Commun.rafraichir);
+      // --- Filtre qualité des annonces : tout décoché par défaut ---
+      const memoQ = memoA("qualite", []);
+      document.getElementById("f-qualite").innerHTML = QUALITE.map(([g, criteres]) => `<h4>${g}</h4>` +
+        criteres.map(([k, l]) =>
+          `<label><input type="checkbox" value="${k}" ${memoQ.includes(k) ? "checked" : ""}> ${l} <small id="nb-q-${k}"></small></label>`).join("")).join("");
+      document.getElementById("f-qualite").addEventListener("change", Commun.rafraichir);
+      document.querySelectorAll("#boutons-qualite button").forEach(b => b.addEventListener("click", () => {
+        document.querySelectorAll("#f-qualite input").forEach(i => { i.checked = b.dataset.qualite === "completes" && QUALITE_COMPLETES.includes(i.value); });
+        Commun.rafraichir();
+      }));
 
       if (initier) initier(d);
       Commun.rafraichir();

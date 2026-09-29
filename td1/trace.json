@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-29",
+  "source": "France Travail — API Offres d'emploi v2",
+  "requete": "une requête codeROME par métier, France entière",
+  "metiers": {
+    "D1415": "Chargé(e) de relation client (CRM)"
+  },
+  "etapes": [
+    {
+      "etape": "Offres actives du périmètre",
+      "n": 350,
+      "retire": 0,
+      "pourquoi": "D1415, offres actives au 2026-09-29"
+    },
+    {
+      "etape": "Sans les doublons",
+      "n": 333,
+      "retire": 17,
+      "pourquoi": "même intitulé, même entreprise, même lieu : on garde la plus récente"
+    },
+    {
+      "etape": "Emplois salariés",
+      "n": 333,
+      "retire": 0,
+      "pourquoi": "franchises, professions libérales et commerciales retirées"
+    },
+    {
+      "etape": "Avec un salaire exploitable",
+      "n": 147,
+      "retire": 186,
+      "pourquoi": "aucun salaire affiché, ou montant hors de 4 000 à 250 000 € bruts par an (25 saisies invraisemblables)"
+    }
+  ],
+  "salaires_ecartes": {
+    "Annuel de 480.0 Euros à 1801.0 Euros": 8,
+    "Annuel de 486.0 Euros à 1801.0 Euros": 7,
+    "Annuel de 400.0 Euros": 2,
+    "Annuel de 487.0 Euros à 1807.0 Euros": 2,
+    "Mensuel de 25200.0 Euros à 27600.0 Euros": 1
+  },
+  "doublons": {
+    "offres_dans_un_groupe": 30,
+    "groupes": 13,
+    "tailles": {
+      "2": 10,
+      "3": 2,
+      "4": 1
+    }
+  }
+}
