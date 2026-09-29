@@ -1,9 +1,9 @@
-r"""TD 1 — étape 1 : préparer la base « Marketing ».
+r"""TD 1 — étape 1 : préparer la base du métier étudié.
 
 Lit data/resume.json (les offres actives du jour, déjà retravaillées par scripts/resumer.py),
-garde les 8 codes ROME du groupe « Marketing », recode les variables et écrit :
+garde les codes ROME de ROMES (le périmètre), recode les variables et écrit :
 
-    td1/base_marketing.csv   une ligne par offre active, avec les colonnes recodées et deux
+    td1/base.csv             une ligne par offre active, avec les colonnes recodées et deux
                              drapeaux : doublon (True = copie d'une autre offre) et salarie
     td1/trace.json           la trace du nettoyage : combien de lignes, ce qui est retiré, pourquoi
 
@@ -21,7 +21,8 @@ from pathlib import Path
 RACINE = Path(__file__).resolve().parent.parent
 SORTIE = Path(__file__).resolve().parent
 
-GROUPE = "Marketing"
+# Le périmètre : le ou les codes ROME étudiés (la liste complète vit dans scripts/extraire.py).
+ROMES = ["D1415"]  # Chargé(e) de relation client (CRM)
 
 # Contrats qui ne sont pas des emplois salariés (franchise, libéral, commercial, reprise).
 NON_SALARIES = {"FRA", "LIB", "CCE", "REP"}
@@ -61,7 +62,7 @@ def cle_doublon(o):
 def main():
     resume = json.loads((RACINE / "data" / "resume.json").read_text(encoding="utf-8"))
     jour = resume["date"]
-    metiers = {m["code"]: m["libelle"] for m in resume["metiers"] if m["groupe"] == GROUPE}
+    metiers = {m["code"]: m["libelle"] for m in resume["metiers"] if m["code"] in ROMES}
     contrats = resume["contrats"]
     offres = [o for o in resume["offres"] if o["rome"] in metiers]
 
@@ -100,7 +101,7 @@ def main():
         })
     lignes.sort(key=lambda l: (l["rome"], l["id"]))
 
-    with (SORTIE / "base_marketing.csv").open("w", newline="", encoding="utf-8") as f:
+    with (SORTIE / "base.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(lignes[0]))
         w.writeheader()
         w.writerows(lignes)
@@ -112,6 +113,8 @@ def main():
     avec_salaire = [l for l in salaries if l["salaire_min_annuel"] != ""]
     affiche_invraisemblable = sum(1 for l in salaries
                                   if l["salaire_brut_texte"] and l["salaire_min_annuel"] == "")
+    ecartes = Counter(l["salaire_brut_texte"] for l in salaries
+                      if l["salaire_brut_texte"] and l["salaire_min_annuel"] == "")
     groupes = Counter(cle_doublon({"intitule": l["intitule"], "entreprise": l["entreprise"],
                                    "lieu": l["lieu"]}) for l in lignes)
     trace = {
@@ -120,8 +123,8 @@ def main():
         "requete": resume["requete"],
         "metiers": metiers,
         "etapes": [
-            {"etape": "Offres actives du groupe Marketing", "n": depart, "retire": 0,
-             "pourquoi": f"8 codes ROME, offres actives au {jour}"},
+            {"etape": "Offres actives du périmètre", "n": depart, "retire": 0,
+             "pourquoi": f"{', '.join(metiers)}, offres actives au {jour}"},
             {"etape": "Sans les doublons", "n": len(sans_doublon),
              "retire": depart - len(sans_doublon),
              "pourquoi": "même intitulé, même entreprise, même lieu : on garde la plus récente"},
@@ -133,6 +136,7 @@ def main():
              "pourquoi": f"aucun salaire affiché, ou montant hors de 4 000 à 250 000 € bruts "
                          f"par an ({affiche_invraisemblable} saisies invraisemblables)"},
         ],
+        "salaires_ecartes": dict(ecartes.most_common(5)),
         "doublons": {
             "offres_dans_un_groupe": sum(n for n in groupes.values() if n > 1),
             "groupes": sum(1 for n in groupes.values() if n > 1),
@@ -142,7 +146,7 @@ def main():
     (SORTIE / "trace.json").write_text(json.dumps(trace, ensure_ascii=False, indent=2),
                                        encoding="utf-8")
 
-    print(f"Base : {depart} offres actives Marketing au {jour} -> td1/base_marketing.csv")
+    print(f"Base : {depart} offres actives {', '.join(metiers)} au {jour} -> td1/base.csv")
     for e in trace["etapes"]:
         print(f"  {e['n']:>5}  {e['etape']}" + (f"  (− {e['retire']} : {e['pourquoi']})"
                                                  if e["retire"] else ""))

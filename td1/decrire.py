@@ -1,6 +1,6 @@
-r"""TD 1 — étape 2 : décrire et montrer la base « Marketing ».
+r"""TD 1 — étape 2 : décrire et montrer la base du métier étudié.
 
-Lit td1/base_marketing.csv et td1/trace.json (écrits par td1/preparer.py) et produit :
+Lit td1/base.csv et td1/trace.json (écrits par td1/preparer.py) et produit :
 
     td1/graphiques/*.png   un graphique par variable, chacun avec sa phrase de lecture
     td1/TD1.md             le dossier du jour : nature des variables, trace, tableaux,
@@ -34,6 +34,8 @@ BLEU, BLEU_CLAIR, GRIS, ORANGE = "#2c5d8f", "#9dbbd9", "#9a9a9a", "#d9822b"
 EXPERIENCE = ["Débutant accepté", "Moins d'un an", "1 an", "2 ans", "3 ans", "4 ans",
               "5 ans", "6 ans et plus"]
 EXP_MANQUANTE = "Exigée, sans durée"
+FORMATIONS = ["< Bac", "Bac", "Bac+2", "Bac+3/4", "Bac+5"]
+FORM_MANQUANTE = "Non renseignée"
 
 
 def n(x, dec=0):
@@ -77,12 +79,14 @@ def tableau_md(df):
 
 def main():
     GRAPHIQUES.mkdir(exist_ok=True)
-    base = pd.read_csv(ICI / "base_marketing.csv", dtype={"departement": str})
+    base = pd.read_csv(ICI / "base.csv", dtype={"departement": str})
     trace = json.loads((ICI / "trace.json").read_text(encoding="utf-8"))
     jour = trace["date"]
     date_fr = pd.Timestamp(jour).strftime("%d/%m/%Y")
+    codes = ", ".join(trace["metiers"])
+    metiers_txt = ", ".join(f"{c} {l}" for c, l in trace["metiers"].items())
     source = (f"Données : France Travail, API Offres d'emploi v2, dépôt metier, "
-              f"8 codes ROME du groupe Marketing, offres actives au {date_fr}.")
+              f"code ROME {codes}, offres actives au {date_fr}.")
     plt.rcParams.update({"font.size": 10, "axes.titlesize": 12, "axes.titleweight": "bold"})
 
     tout = base
@@ -103,7 +107,7 @@ def main():
     ax.set_yticks(y, lib)
     ax.set_xlim(0, max(val) * 1.35)
     for yi, e in zip(y, etapes):
-        ax.text(e["n"] + 15, yi, n(e["n"]) + (f"   − {n(e['retire'])}" if e["retire"] else ""),
+        ax.text(e["n"] + max(val) * 0.01, yi, n(e["n"]) + (f"   − {n(e['retire'])}" if e["retire"] else ""),
                 va="center", fontsize=9)
     ax.spines[["top", "right"]].set_visible(False)
     ax.set_title("De la base brute à l'analyse de salaire")
@@ -112,15 +116,28 @@ def main():
         f"l'analyse de salaire porte sur {n(etapes[-1]['n'])} offres, pas sur {n(etapes[0]['n'])}.",
         source)
 
-    # 2. Métier (qualitative nominale)
-    par_metier = offres["metier"].value_counts()
-    fig, ax = plt.subplots(figsize=(9, 4.2))
-    fig.subplots_adjust(left=0.33, bottom=0.2, top=0.9)
-    barres(ax, par_metier.index, par_metier.values, N)
-    ax.set_title(f"Offres par métier (code ROME), sur {n(N)} offres")
-    lect_metier = (f"{n(par_metier.iloc[0])} offres sur {n(N)} ({pct(par_metier.iloc[0], N)}) "
-                   f"relèvent de « {par_metier.index[0]} ».")
-    figures["metier"] = sauver(fig, "02_metier.png", lect_metier, source)
+    # 2. Formation demandée (qualitative ordinale, très souvent absente)
+    form = offres["formation"].fillna(FORM_MANQUANTE)
+    eff_f = form.value_counts().reindex(FORMATIONS + [FORM_MANQUANTE], fill_value=0)
+    valides_f = eff_f[FORMATIONS].sum()
+    t_form = pd.DataFrame({
+        "Formation": eff_f.index,
+        "Effectif": [n(v) for v in eff_f.values],
+        "Pourcentage": [pct(v, N, 1) for v in eff_f.values],
+        "% valide": [pct(eff_f[c], valides_f, 1) if c in FORMATIONS and valides_f else "manquant"
+                     for c in eff_f.index],
+    })
+    t_form.loc[len(t_form)] = ["**Total**", n(N), "100 %", "100 %"]
+    fig, ax = plt.subplots(figsize=(9, 3.6))
+    fig.subplots_adjust(left=0.22, bottom=0.22, top=0.9)
+    barres(ax, list(eff_f.index), list(eff_f.values), N,
+           couleurs=[BLEU] * len(FORMATIONS) + [GRIS])
+    ax.set_title(f"Niveau de formation demandé, dans l'ordre, sur {n(N)} offres")
+    top_f = eff_f[FORMATIONS].idxmax()
+    lect_form = (f"{n(eff_f[FORM_MANQUANTE])} offres sur {n(N)} ({pct(eff_f[FORM_MANQUANTE], N)}) "
+                 f"ne disent rien du diplôme ; parmi les {n(valides_f)} qui le font, "
+                 f"{n(eff_f[top_f])} demandent « {top_f} ».")
+    figures["formation"] = sauver(fig, "02_formation.png", lect_form, source)
 
     # 3. Contrat (qualitative nominale)
     par_contrat = offres["contrat"].value_counts()
@@ -176,7 +193,7 @@ def main():
                    n(asym, 2), n(aplat, 2)],
     })
     fig, (ax, axb) = plt.subplots(2, 1, figsize=(9, 5.6), height_ratios=[4, 1], sharex=True)
-    fig.subplots_adjust(bottom=0.17, top=0.9, hspace=0.08)
+    fig.subplots_adjust(bottom=0.2, top=0.9, hspace=0.08)
     ax.hist(sal, bins=tranches, color=BLEU_CLAIR, edgecolor="white", density=True,
             label="salaires affichés")
     xs = np.linspace(0, sal.max(), 400)
@@ -186,7 +203,7 @@ def main():
     ax.axvline(moy, color=ORANGE, ls="-", lw=1.5, label=f"moyenne {n(moy)} €")
     ax.set_yticks([])
     ax.set_ylabel("densité")
-    ax.legend(fontsize=8.5, frameon=False)
+    ax.legend(fontsize=8.5, frameon=False, loc="upper left")
     ax.text(0.99, 0.45, f"asymétrie {n(asym, 2)}\naplatissement {n(aplat, 2)}\n(loi normale : 0 et 0)",
             transform=ax.transAxes, ha="right", fontsize=8.5, color="#333")
     ax.spines[["top", "right", "left"]].set_visible(False)
@@ -197,8 +214,10 @@ def main():
     axb.spines[["top", "right", "left"]].set_visible(False)
     axb.set_xlabel("euros bruts par an")
     axb.xaxis.set_major_formatter(lambda v, _: n(v))
+    tire = "vers le haut" if moy > med else "vers le bas"
     lect_sal = (f"la moitié des {n(N_sal)} offres propose moins de {n(med)} € par an ; "
-                f"quelques salaires élevés tirent la moyenne à {n(moy)} € (asymétrie {n(asym, 2)}).")
+                f"la moyenne, {n(moy)} €, est tirée {tire} par les valeurs extrêmes "
+                f"(asymétrie {n(asym, 2)}).")
     figures["salaire"] = sauver(fig, "05_salaire.png", lect_sal, source)
 
     # 6. Salaire en classes, de deux façons
@@ -218,37 +237,30 @@ def main():
     fig.suptitle(f"Le même salaire découpé de deux façons, {n(N_sal)} offres",
                  fontweight="bold")
     classe_max = c10.idxmax()
+    if cq.max() - cq.min() <= 0.04 * N_sal:
+        suite_q = "en quartiles, chaque classe en compte environ un quart."
+    else:
+        suite_q = (f"en quartiles, les classes vont de {n(cq.min())} à {n(cq.max())} offres : "
+                   "les salaires égaux à une borne les déséquilibrent.")
     lect_classes = (f"en tranches de même largeur, {pct(c10.max(), N_sal)} des offres tombent "
-                    f"dans « {classe_max} » ; en quartiles, chaque classe en compte environ un quart.")
+                    f"dans « {classe_max} » ; " + suite_q)
     figures["classes"] = sauver(fig, "06_salaire_classes.png", lect_classes, source)
 
-    # 7. Salaire par métier : même médiane, dispersion différente ?
-    s_met = offres[offres["salarie"] & offres["salaire_min_annuel"].notna()]
-    groupes = (s_met.groupby("metier")["salaire_min_annuel"]
-               .agg(["count", "median", "std"]).query("count >= 10")
-               .sort_values("median"))
-    fig, ax = plt.subplots(figsize=(10, 4.4))
-    fig.subplots_adjust(left=0.36, bottom=0.2, top=0.9)
-    ax.boxplot([s_met.loc[s_met["metier"] == m, "salaire_min_annuel"] for m in groupes.index],
-               orientation="horizontal", widths=0.6, patch_artist=True, boxprops={"facecolor": BLEU_CLAIR},
-               medianprops={"color": BLEU, "lw": 2}, flierprops={"markersize": 3})
-    ax.set_yticks(range(1, len(groupes) + 1),
-                  [f"{m} (n = {int(r['count'])})" for m, r in groupes.iterrows()])
-    ax.xaxis.set_major_formatter(lambda v, _: n(v))
-    ax.set_xlabel("salaire annuel brut minimum affiché, en euros")
-    ax.spines[["top", "right"]].set_visible(False)
-    ax.set_title("Salaire affiché par métier (métiers d'au moins 10 offres)")
-    haut, bas = groupes.iloc[-1], groupes.iloc[0]
-    lect_met = (f"médiane de {n(haut['median'])} € pour « {groupes.index[-1]} » "
-                f"({int(haut['count'])} offres), de {n(bas['median'])} € pour "
-                f"« {groupes.index[0]} » ({int(bas['count'])} offres).")
-    figures["salaire_metier"] = sauver(fig, "07_salaire_metier.png", lect_met, source)
-    t_met = pd.DataFrame({
-        "Métier": groupes.index,
-        "Offres avec salaire": [int(v) for v in groupes["count"]],
-        "Médiane": [f"{n(v)} €" for v in groupes["median"]],
-        "Écart-type": [f"{n(v)} €" for v in groupes["std"]],
-    })
+    # 7. Département (qualitative nominale, écrite en chiffres)
+    dep = offres["departement"].fillna("").replace("", "Non renseigné")
+    par_dep = dep.value_counts()
+    top = par_dep.drop("Non renseigné", errors="ignore").head(10)
+    autres = N - top.sum()
+    etiq = list(top.index) + ["Autres départements et non renseigné"]
+    fig, ax = plt.subplots(figsize=(9, 4.6))
+    fig.subplots_adjust(left=0.4, bottom=0.18, top=0.9)
+    barres(ax, etiq, list(top.values) + [autres], N, couleurs=[BLEU] * len(top) + [GRIS])
+    ax.set_title(f"Les 10 départements qui publient le plus, sur {n(N)} offres")
+    lect_dep = (f"le département {top.index[0]} compte {n(top.iloc[0])} offres sur {n(N)} "
+                f"({pct(top.iloc[0], N)}) ; les 10 premiers en regroupent {pct(top.sum(), N)}, "
+                f"le Puy-de-Dôme (63) en compte {n(par_dep.get('63', 0))}.")
+    figures["departement"] = sauver(fig, "07_departement.png", lect_dep, source)
+    nb_deps = int((par_dep.index != "Non renseigné").sum())
 
     # 8. Date de publication (date) : effectifs par semaine
     pub = pd.to_datetime(offres["date_publication"])
@@ -283,7 +295,7 @@ def main():
     ax.set_ylabel("offres actives")
     ax.spines[["top", "right"]].set_visible(False)
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%d/%m"))
-    ax.set_title("Offres actives Marketing, jour par jour (doublons compris)")
+    ax.set_title(f"Offres actives {codes}, jour par jour (doublons compris)")
     ecart = serie.iloc[-1] - serie.iloc[0]
     d0, d1 = pd.Timestamp(serie.index[0]), pd.Timestamp(serie.index[-1])
     lect_serie = (f"{n(serie.iloc[0])} offres actives le {d0:%d/%m}, {n(serie.iloc[-1])} le "
@@ -331,16 +343,16 @@ def main():
     t_contrat.loc[len(t_contrat)] = ["**Total**", n(N), "100 %"]
     t_classes = pd.DataFrame({"Tranches de 10 000 €": lib_10k, "Offres": [n(v) for v in c10]})
     t_quart = pd.DataFrame({"Quartiles": lib_q, "Offres": [n(v) for v in cq]})
-    metiers_txt = ", ".join(f"{c} {l}" for c, l in trace["metiers"].items())
+    ecartes = "; ".join(f"« {t} » × {k}" for t, k in trace["salaires_ecartes"].items())
 
     def fig_md(cle, titre, lecture):
         return f"![{titre}]({figures[cle]})\n\n*Lecture : {lecture}*\n"
 
     md += [
-        "# TD 1 — Décrire et montrer : le marché des métiers du marketing",
+        f"# TD 1 — Décrire et montrer : le marché du métier {metiers_txt}",
         "",
         f"**Données** : {trace['source']} ; {trace['requete']} ; offres actives au **{date_fr}**.  ",
-        f"**Périmètre** : les 8 codes ROME du groupe Marketing du dépôt metier — {metiers_txt}.  ",
+        f"**Périmètre** : {metiers_txt}, France entière.  ",
         "**Refaire tous les chiffres** : `python td1/preparer.py` puis `python td1/decrire.py`.",
         "",
         "> La base change chaque matin : chaque chiffre ci-dessous vaut pour le "
@@ -355,7 +367,7 @@ def main():
         "## 2. La trace du nettoyage",
         "",
         "Avant le premier graphique : combien de lignes au départ, ce qui est retiré, et pourquoi. "
-        "Rien n'est effacé de `base_marketing.csv` : les lignes retirées sont marquées "
+        "Rien n'est effacé de `base.csv` : les lignes retirées sont marquées "
         "(colonnes `doublon`, `salarie`).",
         "",
         tableau_md(t_trace),
@@ -370,8 +382,9 @@ def main():
         f"- **salaire** : le libellé texte arrive en trois unités ({n(unites.get('Annuel', 0))} en "
         f"annuel, {n(unites.get('Mensuel', 0))} en mensuel, {n(unites.get('Horaire', 0))} en horaire) ; "
         "ramené en brut annuel (mensuel × 12, horaire × 1 607 heures), on garde le minimum de la "
-        "fourchette ; hors de 4 000 à 250 000 € par an, la saisie est jugée fausse et écartée ;",
-        "- **expérience** : « 1 An(s) », « 6 Mois », « 24 Mois - Marketing direct »… recodés en "
+        "fourchette ; hors de 4 000 à 250 000 € par an, la saisie est jugée fausse et écartée "
+        f"(les plus fréquentes : {ecartes}) ;",
+        "- **expérience** : « 1 An(s) », « 6 Mois », « 24 Mois »… recodés en "
         "classes d'années dans l'ordre ; « Expérience exigée » sans durée mise à part, en manquant.",
         "",
         fig_md("trace", "Trace du nettoyage",
@@ -380,9 +393,17 @@ def main():
         "",
         f"Périmètre : les {n(N)} offres actives sans les doublons.",
         "",
-        "### Métier",
+        "### Niveau de formation demandé (ordinale)",
         "",
-        fig_md("metier", "Offres par métier", lect_metier),
+        tableau_md(t_form),
+        "",
+        fig_md("formation", "Formation demandée", lect_form),
+        "### Département",
+        "",
+        f"Les offres viennent de {nb_deps} départements. Un numéro de département s'écrit en "
+        "chiffres mais ne se moyenne pas : c'est une variable nominale.",
+        "",
+        fig_md("departement", "Départements", lect_dep),
         "### Type de contrat",
         "",
         tableau_md(t_contrat),
@@ -407,9 +428,10 @@ def main():
         tableau_md(t_sal),
         "",
         fig_md("salaire", "Salaire affiché", lect_sal),
-        f"La distribution n'est pas normale : elle s'étire vers les hauts salaires (asymétrie "
-        f"{n(asym, 2)} > 0), c'est pourquoi on lit la **médiane** plutôt que la moyenne. "
-        "L'aplatissement est donné « en excès » : 0 pour une loi normale.",
+        f"Asymétrie {n(asym, 2)} : " + ("la distribution s'étire vers les hauts salaires"
+        if asym > 0 else "la distribution s'étire vers les bas salaires") +
+        f" ; aplatissement {n(aplat, 2)}, donné « en excès » (0 pour une loi normale). "
+        "Quand la distribution n'est pas symétrique, on lit la **médiane** plutôt que la moyenne.",
         "",
         "### Mettre le salaire en classes",
         "",
@@ -421,11 +443,6 @@ def main():
         tableau_md(t_quart),
         "",
         fig_md("classes", "Salaire en classes", lect_classes),
-        "### Même métier, même dispersion ?",
-        "",
-        tableau_md(t_met),
-        "",
-        fig_md("salaire_metier", "Salaire par métier", lect_met),
         "## 5. Les dates",
         "",
         fig_md("publication", "Semaine de publication", lect_pub),
