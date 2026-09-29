@@ -35,7 +35,9 @@ h2 small { font-weight:400; color:var(--gris); font-size:.85rem; }
 .grappe { background:rgba(10,92,255,.85); color:#fff; border:2px solid #fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font:600 12px system-ui, sans-serif; box-shadow:0 1px 4px rgba(0,0,0,.3); }
 .grappe.moyenne { font-size:13px; } .grappe.grande { font-size:14px; }
 /* Filtres : trois blocs, une seule carte */
-.filtres { display:grid; grid-template-columns:1.7fr 1fr 1fr; gap:24px; align-items:start; }
+.filtres { display:grid; grid-template-columns:1.7fr 1fr 1fr 1.1fr; gap:24px; align-items:start; }
+.qualite h4 { margin:8px 0 2px; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--gris); }
+.qualite h4:first-child { margin-top:0; }
 .filtres h3 { margin:0 0 8px; font-size:.85rem; text-transform:uppercase; letter-spacing:.04em; color:var(--gris); }
 .metiers { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(280px,100%), 1fr)); gap:4px 24px; }
 .metiers h4 { grid-column:1 / -1; margin:10px 0 2px; font-size:.85rem; text-transform:uppercase; letter-spacing:.04em; color:var(--gris); }
