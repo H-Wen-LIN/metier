@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-29",
+  "source": "France Travail — API Offres d'emploi v2",
+  "requete": "une requête codeROME par métier, France entière",
+  "metiers": {
+    "M1718": "Chargé(e) de marketing digital",
+    "M1716": "Directeur(trice) marketing digital",
+    "M1705": "Responsable marketing",
+    "M1703": "Chef(fe) de produit",
+    "M1620": "Assistant(e) marketing",
+    "M1706": "Chef(fe) de promotion des ventes",
+    "M1430": "Chargé(e) d'études commerciales",
+    "M1711": "Directeur(trice) du marketing"
+  },
+  "etapes": [
+    {
+      "etape": "Offres actives du groupe Marketing",
+      "n": 1395,
+      "retire": 0,
+      "pourquoi": "8 codes ROME, offres actives au 2026-09-29"
+    },
+    {
+      "etape": "Sans les doublons",
+      "n": 1352,
+      "retire": 43,
+      "pourquoi": "même intitulé, même entreprise, même lieu : on garde la plus récente"
+    },
+    {
+      "etape": "Emplois salariés",
+      "n": 1181,
+      "retire": 171,
+      "pourquoi": "franchises, professions libérales et commerciales retirées"
+    },
+    {
+      "etape": "Avec un salaire exploitable",
+      "n": 353,
+      "retire": 828,
+      "pourquoi": "aucun salaire affiché, ou montant hors de 4 000 à 250 000 € bruts par an (8 saisies invraisemblables)"
+    }
+  ],
+  "doublons": {
+    "offres_dans_un_groupe": 80,
+    "groupes": 37,
+    "tailles": {
+      "2": 34,
+      "3": 2,
+      "6": 1
+    }
+  }
+}
