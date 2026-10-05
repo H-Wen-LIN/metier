@@ -133,3 +133,5 @@ copy .env.example .env        (puis remplir avec ses identifiants francetravail.
   (GitHub) : jamais dans un fichier versionné.
 - Un canal, une requête, une date : chaque chiffre du site les affiche.
 - Pas de scraping de LinkedIn, APEC ou Indeed (interdit par leurs CGU).
+- Les autres sites d'emploi qui ouvrent une API (et ceux qui n'en ont pas) sont
+  recensés dans [`sources-api.md`](sources-api.md).
