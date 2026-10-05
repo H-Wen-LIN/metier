@@ -42,47 +42,66 @@ comptent pas.
 | Talent.com (ex-Neuvoo) | agrégateur | ✅ programme éditeurs, sur contrat |
 | Jobijoba (groupe HelloWork) | agrégateur | ⚠️ API existante (client_id / secret), sans inscription en libre-service |
 
-## 2. Les sites retenus : ceux qui donnent une API
+## 2. Les API retenues : gratuites et filtrables aussi finement que France Travail
 
-Classés du plus simple au plus contraignant à obtenir.
+Deux critères, tous deux obligatoires :
 
-| Site | Ce qu'on récupère | Créer le compte développeur | Documentation | Accès et authentification | Points d'attention |
-|---|---|---|---|---|---|
-| **France Travail** | Toutes les offres déposées à France Travail + celles des partenaires qui l'acceptent (dont la fonction publique) | [francetravail.io/inscription](https://francetravail.io/inscription) | [API Offres d'emploi v2](https://francetravail.io/data/api/offres-emploi) · [fiche data.gouv](https://www.data.gouv.fr/dataservices/api-offres-demploi) | Gratuit · OAuth2 (`client_id` / `client_secret`) · 10 appels/s | **Déjà branchée.** 150 offres par appel, 1 150 par requête |
-| **La bonne alternance** | Offres en apprentissage et contrat pro (France Travail, partenaires, offres déposées directement), formations | [api.apprentissage.beta.gouv.fr/fr/compte](https://api.apprentissage.beta.gouv.fr/fr/compte) | [Documentation technique](https://api.apprentissage.beta.gouv.fr/fr/documentation-technique) · [fiche data.gouv](https://www.data.gouv.fr/dataservices/api-la-bonne-alternance) | Gratuit · jeton API créé depuis son compte | Recoupe en partie France Travail : dédoublonner |
-| **Adzuna** | Agrégat multi-sites, France incluse (`/v1/api/jobs/fr/search`), salaires estimés | [developer.adzuna.com/signup](https://developer.adzuna.com/signup) | [developer.adzuna.com](https://developer.adzuna.com/) | Gratuit avec quota · `app_id` + `app_key` | Clés immédiates ; les liens renvoient vers Adzuna |
-| **Careerjet / Optioncarriere** | Agrégat multi-sites (`locale_code=fr_FR`) | [Créer un compte éditeur](https://www.careerjet.com/partners/register/as-publisher) | [API v4](https://www.careerjet.com/partners/api) | Gratuit, rémunéré au clic · clé API en Basic Auth | Une clé par site éditeur ; il faut transmettre l'IP et le user-agent du visiteur |
-| **Jooble** | Agrégat multi-sites | [fr.jooble.org/api/about](https://fr.jooble.org/api/about) (formulaire) | [Documentation REST](https://help.jooble.org/en/support/solutions/articles/60001448238-rest-api-documentation) | Clé envoyée après validation · `POST` JSON | Une clé **par pays** : la demander sur le domaine `fr.` ; quota gratuit faible |
-| **Talent.com** | Agrégat multi-sites, 70+ pays | [Programme éditeurs](https://employers.talent.com/publishers) → [contact](https://www.talent.com/contact) | fournie après accord | Contrat éditeur, rémunéré au clic · API ou flux XML | Pas d'inscription en libre-service : il faut un site avec de l'audience |
-| **Jobijoba** | Agrégat d'environ 400 sites emploi | [Formulaire de contact](https://www.jobijoba.com/fr/contact) | fournie après accord | `client_id` / `client_secret` | API non documentée publiquement : à demander |
+1. **Gratuite et en libre-service** : on crée un compte, on obtient la clé,
+   sans contrat, sans paiement et sans avoir à faire valider un site éditeur.
+2. **Filtrage précis côté API**, comme l'API Offres d'emploi v2 qu'utilise
+   `scripts/extraire.py` : on demande un **code ROME** et un **territoire
+   officiel** (département, commune), pas seulement des mots-clés à trier
+   ensuite.
 
-### À la marge
+Deux API passent ces deux critères.
 
-Utiles pour un complément, mais pas des sites emploi français.
+| API | Ce qu'on récupère | Créer le compte développeur | Documentation | Accès |
+|---|---|---|---|---|
+| **France Travail — Offres d'emploi v2** | Toutes les offres déposées à France Travail, plus celles des partenaires qui l'acceptent (dont la fonction publique) | [francetravail.io/inscription](https://francetravail.io/inscription), puis Mes applications → Créer une application → API « Offres d'emploi v2 » | [API Offres d'emploi v2](https://francetravail.io/data/api/offres-emploi) · [fiche data.gouv](https://www.data.gouv.fr/dataservices/api-offres-demploi) | Gratuit · OAuth2 (`client_id` / `client_secret`) · 10 appels/s · 150 offres par appel, 1 150 par requête. **Déjà branchée.** |
+| **La bonne alternance — Job v1** | Offres en apprentissage et en contrat pro : France Travail, sites partenaires et offres déposées directement sur La bonne alternance | [api.apprentissage.beta.gouv.fr/fr/compte](https://api.apprentissage.beta.gouv.fr/fr/compte) (la clé se génère depuis le compte) | [Documentation technique](https://api.apprentissage.beta.gouv.fr/fr/documentation-technique) · [code et spec OpenAPI](https://github.com/mission-apprentissage/api-apprentissage) | Gratuit · clé API · `GET /job/v1/search`, et `GET /job/v1/export` pour tout télécharger d'un coup |
 
-| Source | Pourquoi à la marge | Créer le compte | Documentation |
-|---|---|---|---|
-| API Engagement | Missions de Service civique et de bénévolat, pas des emplois | [app.api-engagement.beta.gouv.fr](https://app.api-engagement.beta.gouv.fr/) (sur demande à l'équipe) | [doc.api-engagement.beta.gouv.fr](https://doc.api-engagement.beta.gouv.fr/) |
-| The Muse | Surtout des offres américaines, quelques-unes à Paris | [Enregistrer une application](https://www.themuse.com/developers/api/v2/apps) (clé facultative, elle relève le quota) | [API v2](https://www.themuse.com/developers/api/v2) |
-| Remotive, Himalayas, Arbeitnow | Télétravail ou Europe, peu d'offres françaises | aucun compte nécessaire | [Remotive](https://remotive.com/remote-jobs/api) · [Himalayas](https://himalayas.app/api) · [Arbeitnow](https://www.arbeitnow.com/blog/job-board-api) |
-| ATS : SmartRecruiters, Lever, Greenhouse, Teamtailor | Page carrière d'une entreprise précise, pas tout le marché | aucun compte pour lire les offres publiées | [SmartRecruiters Posting API](https://developers.smartrecruiters.com/docs/posting-api) |
+### Ce qu'on peut filtrer
+
+| Filtre | France Travail — Offres d'emploi v2 | La bonne alternance — `/job/v1/search` |
+|---|---|---|
+| Métier | `codeROME` (plusieurs codes possibles), `appellation`, `motsCles` | `romes` (plusieurs codes), `rncp` (diplôme visé) |
+| Territoire | `departement`, `region`, `commune` + `distance` | `departements`, ou `latitude` + `longitude` + `radius` |
+| Contrat | `typeContrat` (CDI, CDD, MIS…), `natureContrat`, `tempsPlein`, `dureeHebdo` | alternance uniquement |
+| Profil demandé | `experience`, `qualification`, `niveauFormation`, `permis` | `target_diploma_level` (niveaux 3 à 7) |
+| Salaire | `salaireMin` + `periodeSalaire` | — |
+| Employeur | `secteurActivite`, `codeNAF`, `entreprisesAdaptees` | `opco` |
+| Fraîcheur | `publieeDepuis` (1, 3, 7, 14, 31 jours), `minCreationDate` / `maxCreationDate` | — |
+| Origine | `origineOffre`, `partenaires` + `modeSelectionPartenaires` | `partners_to_exclude` |
+
+Pour nos 23 codes ROME, La bonne alternance s'interroge donc exactement comme
+France Travail : `romes=M1718,M1716,…`. Elle reprend une partie des offres
+d'alternance de France Travail : passer celles-ci dans `partners_to_exclude`
+pour ne pas les compter deux fois.
+
+### Écartées à ce tri
+
+| API | Gratuite ? | Pourquoi elle sort |
+|---|---|---|
+| Adzuna | ✅ avec quota | Filtrage par mots-clés (`what`, `what_exclude`), lieu en texte (`where`), catégories maison, `permanent` / `contract`, `salary_min`, `max_days_old` : pas de code ROME ni de code INSEE. La plus proche : à reprendre si l'on accepte une requête par mots-clés |
+| Careerjet / Optioncarriere | ✅ rémunérée au clic | Mots-clés, lieu en texte, type de contrat seulement ; il faut un site éditeur et transmettre l'IP et le user-agent de chaque visiteur |
+| Jooble | ⚠️ clé après validation, quota gratuit très faible | Mots-clés et lieu seulement |
+| Talent.com, Jobijoba | ❌ sur contrat ou sur demande | Pas d'inscription en libre-service |
+| API Engagement | ✅ sur demande | Missions de Service civique et de bénévolat, pas des emplois |
+| The Muse, Remotive, Himalayas, Arbeitnow | ✅ | Peu d'offres françaises, pas de filtre par département |
+| ATS (SmartRecruiters, Lever, Greenhouse…) | ✅ | Une entreprise à la fois, pas le marché |
 
 ## 3. Ce qu'il faut savoir avant de brancher une deuxième source
 
-- **Doublons.** Les agrégateurs (Adzuna, Careerjet, Jooble, Talent.com,
-  Jobijoba) reprennent en grande partie les mêmes annonces, dont celles de
-  France Travail. Il faudra une empreinte (intitulé + entreprise + commune)
-  pour ne pas compter deux fois la même offre, comme on le fait déjà pour le
-  réseau M1716.
-- **Pas de code ROME chez les agrégateurs.** On cherche par mots-clés, ce qui
-  ramène du bruit (voir le README : 424 offres pour « marketing digital »
-  contre 113 en M1718). Garder France Travail comme référence et afficher les
-  autres sources à part.
-- **Conditions d'affichage.** Les programmes éditeurs (Careerjet, Jooble,
-  Talent.com, Adzuna) exigent en général que l'offre renvoie vers leur site
-  et que la source soit citée. Ils sont pensés pour un site public avec de
-  l'audience, pas pour une archive de données : lire les CGU avant de
-  conserver le brut comme on le fait pour France Travail.
+- **Doublons.** La bonne alternance reprend une partie des offres de France
+  Travail : exclure ce partenaire dans la requête, puis garder une empreinte
+  (intitulé + entreprise + commune) en filet de sécurité, comme on le fait
+  déjà pour le réseau M1716.
+- **Une source, une colonne.** Garder `source` dans les données brutes
+  (`data/brut/`) pour que chaque chiffre du site dise d'où il vient.
+- **Si l'on rouvre un jour aux agrégateurs** (Adzuna en tête) : pas de code
+  ROME, donc une requête par mots-clés qui ramène du bruit (voir le README :
+  424 offres pour « marketing digital » contre 113 en M1718), et des CGU qui
+  exigent en général un lien vers leur site et la citation de la source.
 - **Identifiants.** Comme pour France Travail : dans `.env` en local, dans les
   secrets du dépôt sur GitHub, jamais dans un fichier versionné.
 - **Toujours pas de scraping** de LinkedIn, de l'Apec, d'Indeed ni des sites
