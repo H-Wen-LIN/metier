@@ -37,7 +37,7 @@ Doublons : 13 groupes d'annonces au même intitulé, même entreprise, même lie
 
 Recodages :
 
-- **salaire** : le libellé texte arrive en trois unités (67 en annuel, 95 en mensuel, 19 en horaire) ; ramené en brut annuel (mensuel × 12, horaire × 1 607 heures), on garde le minimum de la fourchette ; hors de 4 000 à 250 000 € par an, la saisie est jugée fausse et écartée (les plus fréquentes : « Annuel de 480.0 Euros à 1801.0 Euros » × 8; « Annuel de 486.0 Euros à 1801.0 Euros » × 7; « Annuel de 400.0 Euros » × 2; « Annuel de 487.0 Euros à 1807.0 Euros » × 2; « Mensuel de 25200.0 Euros à 27600.0 Euros » × 1) ;
+- **salaire** : le libellé texte arrive en trois unités (67 en annuel, 95 en mensuel, 19 en horaire) ; ramené en brut annuel (mensuel × 12, horaire × 1 820 heures payées), on garde le minimum de la fourchette ; hors de 4 000 à 250 000 € par an, la saisie est jugée fausse et écartée (les plus fréquentes : « Annuel de 480.0 Euros à 1801.0 Euros » × 8; « Annuel de 486.0 Euros à 1801.0 Euros » × 7; « Annuel de 400.0 Euros » × 2; « Annuel de 487.0 Euros à 1807.0 Euros » × 2; « Mensuel de 25200.0 Euros à 27600.0 Euros » × 1) ;
 - **expérience** : « 1 An(s) », « 6 Mois », « 24 Mois »… recodés en classes d'années dans l'ordre ; « Expérience exigée » sans durée mise à part, en manquant.
 
 ![Trace du nettoyage](graphiques/01_trace.png)
@@ -116,25 +116,25 @@ Périmètre : les 147 emplois salariés, sans doublon, avec un salaire exploitab
 | Indicateur | Valeur |
 |---|---|
 | Effectif | 147 |
-| Moyenne | 22 928 € |
-| Médiane | 23 600 € |
+| Moyenne | 23 276 € |
+| Médiane | 24 006 € |
 | Classe modale (tranches de 5 000) | 20 000 à 25 000 € |
-| Écart-type | 7 388 € |
-| Variance | 55 millions d'« euros au carré » |
+| Écart-type | 7 322 € |
+| Variance | 54 millions d'« euros au carré » |
 | Minimum | 4 800 € |
-| 1er quartile | 20 000 € |
+| 1er quartile | 22 404 € |
 | 3e quartile | 27 000 € |
 | Maximum | 45 000 € |
 | Étendue | 40 200 € |
-| Écart interquartile | 7 000 € |
-| Asymétrie (skewness) | -0,73 |
-| Aplatissement (kurtosis, en excès) | 1,49 |
+| Écart interquartile | 4 596 € |
+| Asymétrie (skewness) | -0,88 |
+| Aplatissement (kurtosis, en excès) | 1,81 |
 
 ![Salaire affiché](graphiques/05_salaire.png)
 
-*Lecture : la moitié des 147 offres propose moins de 23 600 € par an ; la moyenne, 22 928 €, est tirée vers le bas par les valeurs extrêmes (asymétrie -0,73).*
+*Lecture : la moitié des 147 offres propose moins de 24 006 € par an ; la moyenne, 23 276 €, est tirée vers le bas par les valeurs extrêmes (asymétrie -0,88).*
 
-Asymétrie -0,73 : la distribution s'étire vers les bas salaires ; aplatissement 1,49, donné « en excès » (0 pour une loi normale). Quand la distribution n'est pas symétrique, on lit la **médiane** plutôt que la moyenne.
+Asymétrie -0,88 : la distribution s'étire vers les bas salaires ; aplatissement 1,81, donné « en excès » (0 pour une loi normale). Quand la distribution n'est pas symétrique, on lit la **médiane** plutôt que la moyenne.
 
 ### Mettre le salaire en classes
 
@@ -142,22 +142,22 @@ Aucun découpage n'est neutre : des tranches de même largeur ou des classes de 
 
 | Tranches de 10 000 € | Offres |
 |---|---|
-| Moins de 20 000 | 30 |
-| 20 000 à 30 000 | 98 |
+| Moins de 20 000 | 17 |
+| 20 000 à 30 000 | 111 |
 | 30 000 à 40 000 | 16 |
 | 40 000 à 50 000 | 3 |
 | 50 000 et plus | 0 |
 
 | Quartiles | Offres |
 |---|---|
-| Moins de 20 000 | 30 |
-| 20 000 à 23 600 | 43 |
-| 23 600 à 27 000 | 36 |
+| Moins de 22 404 | 28 |
+| 22 404 à 24 006 | 45 |
+| 24 006 à 27 000 | 36 |
 | 27 000 et plus | 38 |
 
 ![Salaire en classes](graphiques/06_salaire_classes.png)
 
-*Lecture : en tranches de même largeur, 67 % des offres tombent dans « 20 000 à 30 000 » ; en quartiles, les classes vont de 30 à 43 offres : les salaires égaux à une borne les déséquilibrent.*
+*Lecture : en tranches de même largeur, 76 % des offres tombent dans « 20 000 à 30 000 » ; en quartiles, les classes vont de 28 à 45 offres : les salaires égaux à une borne les déséquilibrent.*
 
 ## 5. Les dates
 

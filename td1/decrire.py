@@ -285,7 +285,8 @@ def main():
 
     # 9. Offres actives jour par jour (série du dépôt)
     serie = pd.read_csv(RACINE / "data" / "serie.csv")
-    serie = (serie[serie["rome"].isin(trace["metiers"])].groupby("date")["total"].sum())
+    serie = serie[serie["rome"].isin(trace["metiers"]) & (serie["date"] <= trace["date"])]
+    serie = serie.groupby("date")["total"].sum()
     fig, ax = plt.subplots(figsize=(9, 3.6))
     fig.subplots_adjust(bottom=0.28, top=0.88)
     x = pd.to_datetime(serie.index)
@@ -381,7 +382,7 @@ def main():
         "",
         f"- **salaire** : le libellé texte arrive en trois unités ({n(unites.get('Annuel', 0))} en "
         f"annuel, {n(unites.get('Mensuel', 0))} en mensuel, {n(unites.get('Horaire', 0))} en horaire) ; "
-        "ramené en brut annuel (mensuel × 12, horaire × 1 607 heures), on garde le minimum de la "
+        "ramené en brut annuel (mensuel × 12, horaire × 1 820 heures payées), on garde le minimum de la "
         "fourchette ; hors de 4 000 à 250 000 € par an, la saisie est jugée fausse et écartée "
         f"(les plus fréquentes : {ecartes}) ;",
         "- **expérience** : « 1 An(s) », « 6 Mois », « 24 Mois »… recodés en "

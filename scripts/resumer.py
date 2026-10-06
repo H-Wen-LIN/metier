@@ -181,7 +181,13 @@ MOTIF_SALAIRE = re.compile(
     r"(?:\s*à\s*(\d+(?:[.,]\d+)?)\s*euros)?",
     re.IGNORECASE,
 )
-MULTIPLICATEUR = {"annuel": 1, "mensuel": 12, "horaire": 1607}
+# Horaire -> annuel : 35 h x 52 semaines / 12 = 151,67 h payées par mois, x 12 = 1 820 h.
+# C'est la base du salaire mensuel (le SMIC mensuel = SMIC horaire x 151,67) : un horaire
+# ramené à l'année doit l'être sur les mêmes heures payées, congés compris. Les 1 607 h
+# « travaillées » (congés déduits) sous-estimaient de 11,7 % les salaires affichés à l'heure,
+# surtout ceux de l'intérim.
+HEURES_PAYEES_PAR_AN = 1820
+MULTIPLICATEUR = {"annuel": 1, "mensuel": 12, "horaire": HEURES_PAYEES_PAR_AN}
 # Fenêtre de vraisemblance, en brut annuel. En dessous : l'employeur a saisi des
 # milliers d'euros dans la case « annuel » (« Annuel de 32.0 Euros à 38.0 Euros »).
 # Au dessus : il a saisi un salaire annuel dans la case « mensuel ». Le plancher
@@ -190,7 +196,7 @@ SALAIRE_MIN, SALAIRE_MAX = 4000, 250000
 
 
 def salaire_min_max(lib):
-    """'Annuel de 32000.0 Euros à 38000.0 Euros' -> (32000, 38000) ; mensuel x12, horaire x1607.
+    """'Annuel de 32000.0 Euros à 38000.0 Euros' -> (32000, 38000) ; mensuel x12, horaire x1820.
 
     On ne lit que cet en-tête : le commentaire libre qui suit un « - » répète ou
     brouille les chiffres (« De 30 à 35 k€ par an », « 13ème mois », « 35h hebdo »),

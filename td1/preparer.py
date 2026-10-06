@@ -9,17 +9,22 @@ garde les codes ROME de ROMES (le périmètre), recode les variables et écrit :
 
 Usage :
     python td1/preparer.py
+    python td1/preparer.py --resume chemin/resume.json   # refaire le TD sur un résumé archivé
 
 Rien n'est supprimé du CSV : les lignes retirées d'une analyse sont marquées, pas effacées,
 pour que chaque chiffre puisse être refait et vérifié.
 """
+import argparse
 import csv
 import json
+import sys
 from collections import Counter
 from pathlib import Path
 
 RACINE = Path(__file__).resolve().parent.parent
 SORTIE = Path(__file__).resolve().parent
+sys.path.insert(0, str(RACINE / "scripts"))
+from resumer import salaire_min_max  # noqa: E402  (la règle de conversion vit dans un seul fichier)
 
 # Le périmètre : le ou les codes ROME étudiés (la liste complète vit dans scripts/extraire.py).
 ROMES = ["D1415"]  # Chargé(e) de relation client (CRM)
@@ -60,7 +65,11 @@ def cle_doublon(o):
 
 
 def main():
-    resume = json.loads((RACINE / "data" / "resume.json").read_text(encoding="utf-8"))
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--resume", default=str(RACINE / "data" / "resume.json"),
+                    help="le résumé à décrire (par défaut celui du jour)")
+    args = ap.parse_args()
+    resume = json.loads(Path(args.resume).read_text(encoding="utf-8"))
     jour = resume["date"]
     metiers = {m["code"]: m["libelle"] for m in resume["metiers"] if m["code"] in ROMES}
     contrats = resume["contrats"]
@@ -75,6 +84,8 @@ def main():
         doublon = cle in vues
         vues.add(cle)
         unite = unite_salaire(o["salaire"])
+        # Salaire recalculé depuis le libellé : un résumé archivé garde la règle de son jour.
+        smin, smax = salaire_min_max(o["salaire"])
         lignes.append({
             "id": o["id"],
             "rome": o["rome"],
@@ -93,8 +104,8 @@ def main():
             "teletravail": o["teletravail"],
             "salaire_brut_texte": o["salaire"] or "",
             "salaire_unite": unite or "",
-            "salaire_min_annuel": o["smin"] if o["smin"] is not None else "",
-            "salaire_max_annuel": o["smax"] if o["smax"] is not None else "",
+            "salaire_min_annuel": smin if smin is not None else "",
+            "salaire_max_annuel": smax if smax is not None else "",
             "date_publication": o["date"],
             "doublon": doublon,
             "url": o["url"] or "",
