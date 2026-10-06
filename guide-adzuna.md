@@ -158,42 +158,54 @@ s'obtient avec `GET /jobs/fr/categories`.
 
 ## 5. Passer de nos codes ROME à des mots-clés
 
-Sans code ROME, la précision vient de `title_only` et de `what_exclude`.
-Point de départ, à affiner en comparant avec les intitulés réels de France
-Travail dans `data/brut/` :
+Sans code ROME, la précision vient de `title_only`. Trois constats faits sur de
+vrais appels le 06/10/2026 :
 
-| ROME | Requête Adzuna |
-|---|---|
-| M1718 Chargé(e) de marketing digital | `title_only=marketing digital` · `what_exclude=directeur responsable` |
-| M1716 Directeur(trice) marketing digital | `title_only=directeur marketing digital` |
-| M1705 Responsable marketing | `title_only=responsable marketing` · `what_exclude=digital` |
-| E1101 Community manager | `title_only=community manager` |
-| E1405 Référenceur(se) web (SEO) | `what_or=SEO référenceur` · `title_only=SEO` |
-| E1113 Responsable e-commerce | `title_only=e-commerce` |
+- **Tous les mots de `title_only` doivent être dans le titre.**
+  `title_only=presse publiques` ne ramène que les titres qui contiennent les
+  deux mots. Pour couvrir plusieurs façons d'écrire un métier, on fait donc
+  plusieurs recherches et on réunit les résultats.
+- **`what_exclude` regarde aussi la description, et il écarte trop d'offres.**
+  `title_only=directeur marketing` : 42 offres sur 30 jours. Avec
+  `what_exclude=digital`, il n'en reste que 9, car presque toutes les annonces
+  parlent de digital quelque part. Il vaut mieux exclure sur le **titre seul**,
+  dans le script.
+- **Un métier rare peut ramener 0 offre sur deux jours sans que la requête
+  soit fausse.** Par exemple, `chief digital` n'a donné qu'une offre en 30 jours.
+
+D'où le format de `REQUETES` dans `scripts/extraire_adzuna.py` :
+
+```python
+"E1103": R("relations presse", "relations publiques", "attaché presse"),  # 3 recherches réunies
+"M1718": R("marketing digital", exclure=("directeur", "directrice", "responsable", "head")),
+"E1101": R("community manager", pages=5),                                  # 211 offres en 2 jours
+```
 
 Le README l'a déjà montré avec France Travail : une requête par mots-clés
 ramène du bruit (424 offres pour « marketing digital » contre 113 en M1718).
-On teste chaque requête sur 50 offres, on lit les titres, puis on ajuste
-`what_exclude`.
+On teste chaque recherche, on lit les titres, puis on ajuste. La colonne
+`total_annonce` de `data/adzuna/serie.csv` dit quand un métier dépasse
+50 offres en deux jours et qu'il faut relever `pages`.
 
 ## 6. Tenir dans le quota
 
-| Stratégie | Appels | Tient dans 2 500/mois ? |
-|---|---|---|
-| 23 métiers × toutes les pages, chaque jour | plusieurs centaines par jour | ❌ |
-| 23 métiers × 1 page, `sort_by=date`, `max_days_old=1`, chaque jour | 23 × 30 ≈ 690 | ✅ |
-| Le cœur marketing (8 métiers) × 2 pages, chaque jour | 8 × 2 × 30 = 480 | ✅ |
+Le script s'arrête de paginer dès qu'une page n'est pas pleine : `pages` est un
+maximum, pas un nombre d'appels fixe.
 
-La deuxième ligne suffit pour **afficher les nouvelles offres du jour**, ce qui
-est justement l'usage que les CGU autorisent. Pour compter le marché, le champ
-`count` d'une réponse donne le total sans tout paginer, mais publier ce
-total sur le site, c'est de l'agrégation (§ 0).
+| Réglage actuel | Appels par jour | Par mois | Tient dans 2 500/mois ? |
+|---|---|---|---|
+| 23 métiers, 29 recherches, pages supplémentaires pour les 6 métiers à fort volume | ≈ 40 | ≈ 1 200 | ✅ |
+
+Ça suffit pour **afficher les nouvelles offres du jour**, ce qui est justement
+l'usage que les CGU autorisent. Pour compter le marché, le champ `count` d'une
+réponse donne le total sans tout paginer, mais publier ce total sur le site,
+c'est de l'agrégation (§ 0).
 
 ## 7. Exemple en Python, sur le modèle de `scripts/extraire.py`
 
 > **C'est branché :** `scripts/extraire_adzuna.py` fait tout ça pour les 23
-> métiers (une page par métier, triée par date, sur les offres des deux
-> derniers jours) et enregistre les offres dans `data/adzuna/`. La veille
+> métiers (une ou plusieurs recherches par métier, triées par date, sur les
+> offres des deux derniers jours) et enregistre les offres dans `data/adzuna/`. La veille
 > (`.github/workflows/veille.yml`) le lance chaque matin après France Travail,
 > dès que les secrets `ADZUNA_APP_ID` et `ADZUNA_APP_KEY` sont ajoutés. Les
 > mots-clés de chaque métier sont dans `REQUETES`, en tête du script.
@@ -235,7 +247,7 @@ def chercher_adzuna(params, pages=1, par_page=50):
 
 
 nouvelles = chercher_adzuna(
-    {"title_only": "marketing digital", "what_exclude": "stage",
+    {"title_only": "marketing digital",
      "sort_by": "date", "max_days_old": 1}
 )
 ```

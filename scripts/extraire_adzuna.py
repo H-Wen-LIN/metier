@@ -11,9 +11,10 @@ Ce que ça écrit :
     data/adzuna/serie.csv                une ligne par métier et par jour : total annoncé,
                                          récupérées, nouvelles
 
-Adzuna n'a pas de code ROME : chaque métier est une requête par mots-clés (REQUETES), à affiner
-en lisant les titres renvoyés. Une seule page par métier, triée par date, sur les offres des deux
-derniers jours : 23 appels par jour, ~700 par mois, sous le quota gratuit (2 500 par mois).
+Adzuna n'a pas de code ROME : chaque métier est une ou plusieurs recherches de mots dans le
+titre (REQUETES), à affiner en lisant les titres renvoyés. Les offres des deux derniers jours,
+triées par date, 50 par page, jusqu'à `pages` pages : la pagination s'arrête dès qu'une page
+n'est pas pleine. Environ 40 appels par jour, ~1 200 par mois, sous le quota gratuit (2 500).
 
 Conditions d'utilisation (voir guide-adzuna.md) : afficher ces offres est permis avec la mention
 « Jobs by Adzuna » ; en tirer des statistiques publiées (comptages, salaires) demande l'accord écrit
@@ -44,35 +45,50 @@ API = "https://api.adzuna.com/v1/api"
 PAR_PAGE = 50
 DOSSIER = RACINE / "data" / "adzuna"
 
-# Code ROME -> paramètres de recherche Adzuna. title_only : mots cherchés dans le titre seulement ;
-# what_exclude : mots qui écartent l'offre. Point de départ, à ajuster sur les titres récupérés.
+
+def R(*titres, exclure=(), pages=1):
+    """Une entrée de REQUETES : les recherches à faire pour un métier.
+
+    titres  : chaque chaîne est une recherche Adzuna `title_only` ; tous ses mots doivent figurer
+              dans le titre (« directeur marketing » = directeur ET marketing). Plusieurs chaînes
+              = plusieurs recherches, réunies.
+    exclure : mots qui écartent une offre s'ils sont dans son TITRE. Filtré ici, pas par l'API :
+              le `what_exclude` d'Adzuna regarde aussi la description et écarte trop d'offres
+              (« directeur marketing » : 42 offres sur 30 jours, 9 avec what_exclude=digital).
+    pages   : pages de 50 offres au plus, par recherche ; à relever si un métier dépasse 50 offres
+              en deux jours (voir total_annonce dans data/adzuna/serie.csv).
+    """
+    return {"titres": list(titres), "exclure": list(exclure), "pages": pages}
+
+
+# Code ROME -> recherches Adzuna. Volumes du 06/10/2026, offres des deux derniers jours, en commentaire.
 REQUETES = {
     # Cœur marketing
-    "M1718": {"title_only": "marketing digital", "what_exclude": "directeur directrice responsable"},
-    "M1716": {"title_only": "directeur marketing digital"},
-    "M1705": {"title_only": "responsable marketing", "what_exclude": "digital"},
-    "M1703": {"title_only": "chef produit", "what_exclude": "digital"},
-    "M1620": {"title_only": "assistant marketing"},
-    "M1706": {"title_only": "promotion ventes"},
-    "M1430": {"title_only": "études marketing"},
-    "M1711": {"title_only": "directeur marketing", "what_exclude": "digital"},
+    "M1718": R("marketing digital", exclure=("directeur", "directrice", "responsable", "head")),   # 36
+    "M1716": R("directeur marketing digital", "responsable marketing digital"),                   # 1 + 3
+    "M1705": R("responsable marketing", exclure=("digital",)),                                     # 13
+    "M1703": R("chef produit", exclure=("digital",), pages=2),                                     # 66
+    "M1620": R("assistant marketing", pages=2),                                                    # 50
+    "M1706": R("promotion ventes"),
+    "M1430": R("études marketing"),
+    "M1711": R("directeur marketing", "head marketing", exclure=("digital",)),                     # 2 + 2
     # Digital, contenu, e-commerce
-    "E1113": {"title_only": "e-commerce", "what_exclude": "assistant assistante"},
-    "D1438": {"title_only": "assistant e-commerce"},
-    "E1101": {"title_only": "community manager"},
-    "E1124": {"title_only": "social media"},
-    "E1405": {"title_only": "SEO"},
-    "M1886": {"title_only": "chef projet web"},
-    "M1426": {"title_only": "chief digital officer"},
-    "M1719": {"title_only": "influence"},
-    "E1406": {"title_only": "influenceur"},
+    "E1113": R("e-commerce", exclure=("assistant", "assistante"), pages=2),                        # 91
+    "D1438": R("assistant e-commerce"),
+    "E1101": R("community manager", pages=5),                                                      # 211
+    "E1124": R("social media"),
+    "E1405": R("SEO"),
+    "M1886": R("chef projet web"),
+    "M1426": R("chief digital"),                                    # rare : 1 offre sur 30 jours
+    "M1719": R("influence"),                                                                       # 19
+    "E1406": R("influenceur", "créateur contenu", "UGC"),                                          # 0 + 2 + 0
     # Communication et commerce, à la frontière
-    "E1112": {"title_only": "chargé communication"},
-    "E1103": {"title_only": "relations presse"},
-    "E1107": {"title_only": "événementiel"},
-    "E1404": {"title_only": "publicité"},
-    "D1506": {"title_only": "merchandising"},
-    "D1415": {"title_only": "CRM"},
+    "E1112": R("chargé communication", pages=2),                                                   # 97
+    "E1103": R("relations presse", "relations publiques", "attaché presse"),                       # 38 sur 30 j
+    "E1107": R("événementiel", pages=2),                                                           # 61
+    "E1404": R("publicité"),
+    "D1506": R("merchandising"),
+    "D1415": R("CRM"),
 }
 
 
@@ -127,27 +143,45 @@ def main():
     vus = ids_connus()
 
     lignes_serie = []
+    arret = None
     for code in codes:
-        params = dict(c, **REQUETES[code], results_per_page=PAR_PAGE,
-                      sort_by="date", max_days_old=2)
-        try:
-            reponse = appeler("jobs/fr/search/1", params)
-        except RuntimeError as e:                     # quota atteint, panne : on garde ce qu'on a
-            print(f"{code}  arrêt : {e}")
+        req = REQUETES[code]
+        total, offres = 0, {}
+        for titre in req["titres"]:
+            for page in range(1, req["pages"] + 1):
+                params = dict(c, title_only=titre, results_per_page=PAR_PAGE,
+                              sort_by="date", max_days_old=2)
+                try:
+                    reponse = appeler(f"jobs/fr/search/{page}", params)
+                except RuntimeError as e:             # quota atteint, panne : on garde ce qu'on a
+                    arret = f"{code}  arrêt : {e}"
+                    break
+                if page == 1:
+                    total += reponse.get("count") or 0
+                lot = reponse.get("results", [])
+                for o in lot:
+                    if not any(m in o.get("title", "").lower() for m in req["exclure"]):
+                        offres.setdefault(o["id"], o)
+                time.sleep(2.5)                       # 25 appels par minute au plus
+                if len(lot) < PAR_PAGE:
+                    break
+            if arret:
+                break
+        if arret:
+            print(arret)
             break
-        offres = reponse.get("results", [])
         nouvelles = 0
         with (DOSSIER / aujourdhui[:7] / f"{code}.jsonl").open("a", encoding="utf-8") as brut:
-            for o in offres:
+            for o in offres.values():
                 if o["id"] not in vus:
                     vus.add(o["id"])
                     nouvelles += 1
                     brut.write(json.dumps({"id": o["id"], "vu_le": aujourdhui, "rome": code,
-                                           "requete": REQUETES[code], "offre": o},
+                                           "requete": req, "offre": o},
                                           ensure_ascii=False) + "\n")
-        lignes_serie.append([aujourdhui, code, reponse.get("count", ""), len(offres), nouvelles])
-        print(f"{code}  {METIERS[code][0]:<48} {len(offres):3d} récupérées, {nouvelles:3d} nouvelles")
-        time.sleep(2.5)                               # 25 appels par minute au plus
+        lignes_serie.append([aujourdhui, code, total, len(offres), nouvelles])
+        print(f"{code}  {METIERS[code][0]:<48} {total:4d} annoncées, {len(offres):3d} gardées, "
+              f"{nouvelles:3d} nouvelles")
 
     serie = DOSSIER / "serie.csv"
     lignes = []
