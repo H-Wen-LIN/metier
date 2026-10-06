@@ -187,6 +187,14 @@ total sur le site, c'est de l'agrégation (§ 0).
 
 ## 7. Exemple en Python, sur le modèle de `scripts/extraire.py`
 
+> **C'est branché :** `scripts/extraire_adzuna.py` fait tout ça pour les 23
+> métiers (une page par métier, triée par date, sur les offres des deux
+> derniers jours) et enregistre les offres dans `data/adzuna/`. La veille
+> (`.github/workflows/veille.yml`) le lance chaque matin après France Travail,
+> dès que les secrets `ADZUNA_APP_ID` et `ADZUNA_APP_KEY` sont ajoutés. Les
+> mots-clés de chaque métier sont dans `REQUETES`, en tête du script.
+> L'exemple ci-dessous montre seulement le principe.
+
 ```python
 import os
 import time

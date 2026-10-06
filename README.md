@@ -71,6 +71,7 @@ API France Travail  →  scripts/extraire.py  →  data/brut/<mois>/<ROME>.jsonl
                        scripts/resumer.py   →  data/resume.json                ce que les pages affichent (+ data/geo/, cache des positions)
                        index.html + 4 pages →  https://vincentfavarin.github.io/metier/
                        .github/workflows/veille.yml : GitHub relance tout ça chaque matin à 7 h
+API Adzuna (facultatif) → scripts/extraire_adzuna.py → data/adzuna/       à part, hors des chiffres du site (voir guide-adzuna.md)
 ```
 
 - `scripts/extraire.py` — une requête `codeROME` par métier (token OAuth,
@@ -123,7 +124,8 @@ copy .env.example .env        (puis remplir avec ses identifiants francetravail.
 ## Faire tourner sans soi (GitHub)
 
 1. Dépôt **public** (GitHub Pages gratuit ne fonctionne que sur un dépôt public).
-2. Settings → Secrets and variables → Actions : `FT_CLIENT_ID` et `FT_CLIENT_SECRET`.
+2. Settings → Secrets and variables → Actions : `FT_CLIENT_ID` et `FT_CLIENT_SECRET`
+   (et, si l'on veut Adzuna, `ADZUNA_APP_ID` et `ADZUNA_APP_KEY`).
 3. Settings → Pages → Source « Deploy from a branch », branche `main`, dossier `/ (root)`.
 4. Actions → veille → Run workflow : le premier commit du bot arrive dans `data/`.
 
