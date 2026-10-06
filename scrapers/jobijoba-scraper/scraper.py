@@ -17,6 +17,7 @@ import os
 import re
 import sys
 import time
+from datetime import date, datetime, timedelta
 from urllib.parse import quote_plus, urljoin, urlsplit
 
 import requests
@@ -27,6 +28,9 @@ USER_AGENT = "jobijoba-scraper-perso/1.0 (projet personnel, usage modere)"
 DELAI_SECONDES = 3          # entre deux pages de résultats
 DELAI_DETAILS_SECONDES = 2  # entre deux pages d'offre (option --details)
 PAGES_MAX = 10              # 30 offres par page
+MAX_MOIS_DEFAUT = 6         # ancienneté maximale des offres conservées
+MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août",
+        "septembre", "octobre", "novembre", "décembre"]
 
 # Icône de chaque caractéristique d'une offre -> colonne du CSV
 ICONES = {
@@ -39,7 +43,8 @@ ICONES = {
 }
 
 COLONNES = ["titre", "metier", "categorie", "lieu", "contrat", "entreprise", "salaire",
-            "teletravail", "date", "resume", "sponsorise", "recherche", "url"]
+            "teletravail", "date", "anciennete_jours", "date_affichee", "resume", "sponsorise",
+            "recherche", "url"]
 COLONNES_DETAILS = ["date_publication", "date_expiration", "code_postal", "region",
                     "salaire_min", "salaire_max", "salaire_periode", "temps_travail",
                     "description"]
@@ -102,7 +107,7 @@ def extraire_offre(carte):
     offre = dict.fromkeys(COLONNES, "")
     offre.update({
         "titre": texte(carte.select_one(".offer-header-title")),
-        "date": texte(carte.select_one(".publication_date")),
+        "date_affichee": texte(carte.select_one(".publication_date")),
         "resume": texte(carte.select_one(".description")).replace("…", "").strip(),
         "sponsorise": carte.select_one(".sponsorised") is not None,
     })
@@ -121,6 +126,9 @@ def extraire_offre(carte):
         except (ValueError, KeyError, IndexError):
             pass
 
+    publication = date_depuis_texte(offre["date_affichee"])
+    offre["date"] = publication.isoformat() if publication else ""
+
     lien = carte.find("a", href=re.compile(r"/annonce/"))
     if lien:
         offre["url"] = urljoin(BASE, lien["href"])
@@ -129,6 +137,71 @@ def extraire_offre(carte):
         if encode:
             offre["url"] = decoder_lien(encode["data-atc"])
     return offre
+
+
+def date_depuis_texte(valeur, maintenant=None):
+    """Convertit « Il y a 13 h », « Hier », « 11 juin »… en date.
+
+    Jobijoba n'affiche pas l'année : « 11 juin » est compris comme le 11 juin
+    passé le plus récent. Seule l'option --details donne la date exacte.
+    """
+    maintenant = maintenant or datetime.now()
+    valeur = valeur.strip().lower()
+    if not valeur:
+        return None
+    if valeur.startswith("aujourd"):
+        return maintenant.date()
+    if valeur.startswith("hier"):
+        return maintenant.date() - timedelta(days=1)
+    m = re.match(r"il y a (\d+)\s*(min|h|j|jour|sem|mois)", valeur)
+    if m:
+        n, unite = int(m.group(1)), m.group(2)
+        ecart = {"min": timedelta(minutes=n), "h": timedelta(hours=n), "j": timedelta(days=n),
+                 "jour": timedelta(days=n), "sem": timedelta(weeks=n), "mois": timedelta(days=30 * n)}
+        return (maintenant - ecart[unite]).date()
+    m = re.match(r"(\d{1,2})\s+([a-zéû]+)(?:\s+(\d{4}))?", valeur)
+    if m and m.group(2) in MOIS:
+        jour, mois = int(m.group(1)), MOIS.index(m.group(2)) + 1
+        annee = int(m.group(3)) if m.group(3) else maintenant.year
+        try:
+            resultat = date(annee, mois, jour)
+            if not m.group(3) and resultat > maintenant.date():
+                resultat = date(annee - 1, mois, jour)
+        except ValueError:
+            return None
+        return resultat
+    return None
+
+
+def date_limite(max_mois, aujourd_hui=None):
+    """Date d'il y a max_mois mois (le jour est ramené au dernier jour du mois si besoin)."""
+    aujourd_hui = aujourd_hui or date.today()
+    total = aujourd_hui.year * 12 + aujourd_hui.month - 1 - max_mois
+    annee, mois = divmod(total, 12)
+    for jour in range(aujourd_hui.day, 27, -1):
+        try:
+            return date(annee, mois + 1, jour)
+        except ValueError:
+            continue
+    return date(annee, mois + 1, min(aujourd_hui.day, 28))
+
+
+def filtrer_par_anciennete(offres, max_mois):
+    """Garde les offres publiées depuis moins de max_mois mois (0 = pas de filtre)."""
+    aujourd_hui = date.today()
+    for offre in offres:
+        if offre["date"]:
+            offre["anciennete_jours"] = (aujourd_hui - date.fromisoformat(offre["date"])).days
+    if not max_mois:
+        return offres
+    limite = date_limite(max_mois, aujourd_hui).isoformat()
+    gardees = [o for o in offres if not o["date"] or o["date"] >= limite]
+    if len(gardees) < len(offres):
+        print(f"{len(offres) - len(gardees)} offres publiées avant le {limite} écartées")
+    sans_date = sum(1 for o in gardees if not o["date"])
+    if sans_date:
+        print(f"{sans_date} offres sans date lisible conservées")
+    return gardees
 
 
 def etat_recherche(html):
@@ -261,13 +334,16 @@ def ajouter_details(session, regles, offres):
             continue
         if r.status_code == 200:
             offre.update(extraire_details(r.text))
+            if offre.get("date_publication"):  # date exacte, plus fiable que la liste
+                offre["date"] = offre["date_publication"]
         if i % 10 == 0:
             print(f"  {i}/{len(a_lire)}")
 
 
 # --- Programme principal ------------------------------------------------------
 
-def scraper(mot_cle, villes=None, pages=1, details=False, sponsorises=True):
+def scraper(mot_cle, villes=None, pages=1, details=False, sponsorises=True,
+            max_mois=MAX_MOIS_DEFAUT):
     session = requests.Session()
     session.headers["User-Agent"] = USER_AGENT
     offres, vues = [], set()
@@ -282,8 +358,11 @@ def scraper(mot_cle, villes=None, pages=1, details=False, sponsorises=True):
             time.sleep(DELAI_SECONDES)
         scraper_recherche(session, regles, mot_cle, ville, pages, offres, vues, sponsorises)
 
+    # Filtre une première fois avant --details pour ne pas ouvrir d'offres trop anciennes
+    offres = filtrer_par_anciennete(offres, max_mois)
     if details and offres:
         ajouter_details(session, regles, offres)
+        offres = filtrer_par_anciennete(offres, max_mois)
     return offres
 
 
@@ -311,11 +390,14 @@ def main():
                         "le salaire chiffré… (plus lent)")
     p.add_argument("--sans-sponsorises", action="store_true",
                    help="Ignore les offres sponsorisées (souvent sans rapport avec la recherche)")
+    p.add_argument("--max-mois", type=int, default=MAX_MOIS_DEFAUT,
+                   help=f"Écarte les offres publiées il y a plus de N mois ({MAX_MOIS_DEFAUT} par défaut, 0 = toutes)")
     p.add_argument("--sortie", default="data/offres.csv", help="Fichier CSV de sortie")
     args = p.parse_args()
 
     pages = min(max(args.pages, 1), PAGES_MAX)
-    offres = scraper(args.mot_cle, args.ville, pages, args.details, not args.sans_sponsorises)
+    offres = scraper(args.mot_cle, args.ville, pages, args.details, not args.sans_sponsorises,
+                     max(args.max_mois, 0))
     enregistrer_csv(offres, args.sortie)
 
 

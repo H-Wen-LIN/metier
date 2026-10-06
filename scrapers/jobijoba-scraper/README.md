@@ -27,9 +27,14 @@ Options :
 - `--pages` : nombre de pages de 30 offres par ville, 10 au maximum (1 par défaut). Les pages suivantes sont chargées comme le fait le bouton « Voir les offres suivantes » du site.
 - `--sans-sponsorises` : ignore les offres sponsorisées, souvent sans rapport avec la recherche
 - `--details` : ouvre la page de chaque offre pour récupérer la description complète, la date de publication et d'expiration, le code postal, la région et le salaire chiffré (plus lent : 2 secondes par offre)
+- `--max-mois` : écarte les offres publiées il y a plus de N mois (6 par défaut, `--max-mois 12` pour un an, `--max-mois 0` pour tout garder)
 - `--sortie` : chemin du fichier CSV (`data/offres.csv` par défaut)
 
-Le CSV (séparateur `;`, ouvrable dans Excel) contient pour chaque offre : titre, métier, catégorie, lieu, contrat, entreprise, salaire, télétravail, date, résumé, offre sponsorisée ou non, recherche d'origine et lien vers l'annonce. Avec `--details` s'ajoutent : date de publication, date d'expiration, code postal, région, salaire min, salaire max, période du salaire, temps de travail et description complète. Certaines offres reprises d'autres sites n'ont que la description.
+Le CSV (séparateur `;`, ouvrable dans Excel) contient pour chaque offre : titre, métier, catégorie, lieu, contrat, entreprise, salaire, télétravail, date de publication (AAAA-MM-JJ), ancienneté en jours, date telle qu'affichée, résumé, offre sponsorisée ou non, recherche d'origine et lien vers l'annonce. Avec `--details` s'ajoutent : date de publication, date d'expiration, code postal, région, salaire min, salaire max, période du salaire, temps de travail et description complète. Certaines offres reprises d'autres sites n'ont que la description.
+
+### Date des offres
+
+Jobijoba affiche « Il y a 13 h », « Hier » ou « 11 juin », sans l'année. Le script convertit ces mentions en date : « 11 juin » est compris comme le 11 juin passé le plus récent. Une offre réellement publiée l'année précédente pourrait donc paraître plus récente qu'elle ne l'est. Avec `--details`, la date exacte de publication remplace cette estimation quand l'offre la fournit, et le filtre `--max-mois` est appliqué une seconde fois. Les offres sans date lisible sont conservées.
 
 ## Bonnes pratiques
 

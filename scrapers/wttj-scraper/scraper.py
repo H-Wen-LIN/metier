@@ -16,6 +16,7 @@ import json
 import os
 import re
 import time
+from datetime import date
 from urllib.parse import urljoin, urlsplit
 
 import requests
@@ -25,6 +26,7 @@ BASE = "https://www.welcometothejungle.com"
 USER_AGENT = "wttj-scraper-perso/1.0 (projet personnel, usage modere)"
 DELAI_SECONDES = 5
 PAGES_LIEES_MAX = 20
+MAX_MOIS_DEFAUT = 6  # ancienneté maximale des offres conservées
 
 CONTRATS = {
     "full_time": "CDI", "temporary": "CDD / Temporaire", "internship": "Stage",
@@ -42,7 +44,7 @@ ETUDES = {"bac": "Bac", "cap_bep": "CAP / BEP", "doctorate": "Doctorat"}
 COLONNES = ["titre", "entreprise", "description_entreprise", "contrat", "duree_contrat_mois",
             "lieu", "departement", "region", "latitude", "longitude", "teletravail",
             "salaire", "salaire_min", "salaire_max", "salaire_periode", "experience_min_annees",
-            "niveau_etudes", "secteur", "taille", "annee_creation", "date",
+            "niveau_etudes", "secteur", "taille", "annee_creation", "date", "anciennete_jours",
             "recrute_activement", "resume", "missions", "avantages", "page", "url"]
 
 
@@ -229,7 +231,41 @@ def extraire_page(html):
 
 # --- Programme principal ------------------------------------------------------
 
-def scraper(pages, suivre=0):
+def date_limite(max_mois, aujourd_hui=None):
+    """Date d'il y a max_mois mois (le jour est ramené au dernier jour du mois si besoin)."""
+    aujourd_hui = aujourd_hui or date.today()
+    total = aujourd_hui.year * 12 + aujourd_hui.month - 1 - max_mois
+    annee, mois = divmod(total, 12)
+    for jour in range(aujourd_hui.day, 27, -1):
+        try:
+            return date(annee, mois + 1, jour)
+        except ValueError:
+            continue
+    return date(annee, mois + 1, min(aujourd_hui.day, 28))
+
+
+def filtrer_par_anciennete(offres, max_mois):
+    """Garde les offres publiées depuis moins de max_mois mois (0 = pas de filtre)."""
+    aujourd_hui = date.today()
+    for offre in offres:
+        offre["anciennete_jours"] = ""
+        try:
+            offre["anciennete_jours"] = (aujourd_hui - date.fromisoformat(offre["date"])).days
+        except ValueError:
+            offre["date"] = ""
+    if not max_mois:
+        return offres
+    limite = date_limite(max_mois, aujourd_hui).isoformat()
+    gardees = [o for o in offres if not o["date"] or o["date"] >= limite]
+    if len(gardees) < len(offres):
+        print(f"{len(offres) - len(gardees)} offres publiées avant le {limite} écartées")
+    sans_date = sum(1 for o in gardees if not o["date"])
+    if sans_date:
+        print(f"{sans_date} offres sans date lisible conservées")
+    return gardees
+
+
+def scraper(pages, suivre=0, max_mois=MAX_MOIS_DEFAUT):
     session = requests.Session()
     session.headers["User-Agent"] = USER_AGENT
     offres, vues = [], set()
@@ -282,7 +318,7 @@ def scraper(pages, suivre=0):
                 a_visiter.append(lien)
                 liees_ajoutees += 1
 
-    return offres
+    return filtrer_par_anciennete(offres, max_mois)
 
 
 def enregistrer_csv(offres, chemin):
@@ -303,10 +339,12 @@ def main():
                    help="Une ou plusieurs pages (ex. emploi-developpeur-web-paris-75000) ou URL complètes")
     p.add_argument("--suivre", type=int, default=0,
                    help=f"Visite aussi jusqu'à N pages « emploi » liées (métiers ou villes proches, max {PAGES_LIEES_MAX})")
+    p.add_argument("--max-mois", type=int, default=MAX_MOIS_DEFAUT,
+                   help=f"Écarte les offres publiées il y a plus de N mois ({MAX_MOIS_DEFAUT} par défaut, 0 = toutes)")
     p.add_argument("--sortie", default="data/offres_wttj.csv", help="Fichier CSV de sortie")
     args = p.parse_args()
 
-    offres = scraper(args.pages, min(max(args.suivre, 0), PAGES_LIEES_MAX))
+    offres = scraper(args.pages, min(max(args.suivre, 0), PAGES_LIEES_MAX), max(args.max_mois, 0))
     enregistrer_csv(offres, args.sortie)
 
 
