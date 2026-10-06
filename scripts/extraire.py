@@ -90,8 +90,12 @@ def chercher(token, params, pas=150, maximum=1150):
     offres, total, debut = [], None, 0
     while debut < maximum:
         fin = min(debut + pas - 1, maximum - 1)
-        r = requests.get(SEARCH_URL, params=dict(params, range=f"{debut}-{fin}"),
-                         headers={"Authorization": f"Bearer {token}"}, timeout=30)
+        for essai in range(5):                       # 429 = trop d'appels : on attend et on réessaie
+            r = requests.get(SEARCH_URL, params=dict(params, range=f"{debut}-{fin}"),
+                             headers={"Authorization": f"Bearer {token}"}, timeout=30)
+            if r.status_code != 429:
+                break
+            time.sleep(int(r.headers.get("Retry-After") or 0) or 2 ** (essai + 1))
         if r.status_code == 204:                     # aucune offre
             break
         if r.status_code not in (200, 206):
