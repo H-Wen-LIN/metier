@@ -19,6 +19,7 @@ import json
 import re
 import sys
 from collections import Counter, defaultdict
+from datetime import date
 from pathlib import Path
 
 RACINE = Path(__file__).resolve().parent.parent
@@ -166,6 +167,25 @@ def main():
           sum(c for c in employeurs.values() if c >= 2), "| les plus présents :", employeurs.most_common(3))
     print("descriptions identiques       ", sum(c for c in textes.values() if c > 1), "offres dans",
           sum(c > 1 for c in textes.values()), "groupes")
+
+    # 5 bis. offresManqueCandidats : un drapeau posé sur l'offre, qui dépend de son âge.
+    ages, change = Counter(), 0
+    versions = defaultdict(list)
+    for f in sorted((RACINE / "data" / "brut").glob(f"*/{args.rome}.jsonl")):
+        for ligne in f.open(encoding="utf-8"):
+            if ligne.strip():
+                v = json.loads(ligne)
+                if (not args.jusquau or v["vu_le"] <= args.jusquau) and v["offre"]["origineOffre"]["origine"] == "1":
+                    versions[v["id"]].append((v["vu_le"], v["offre"]["dateCreation"][:10],
+                                              v["offre"].get("offresManqueCandidats")))
+    for vs in versions.values():
+        vraies = [date.fromisoformat(vu) - date.fromisoformat(cree) for vu, cree, x in vs if x is True]
+        if vraies:
+            ages[min(vraies).days] += 1
+        change += len({x for _, _, x in vs}) > 1
+    print("\n## offresManqueCandidats (canal FT)\n")
+    print("âge (jours) à la première version « vraie » :", dict(sorted(ages.items())))
+    print("offres dont la valeur change d'une version à l'autre :", change, "sur", len(versions))
 
     # 6. Flux : combien d'offres nouvelles par jour, pour dimensionner l'échantillon de confirmation.
     jours = sorted(premiere.values())

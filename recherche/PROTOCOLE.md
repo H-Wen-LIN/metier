@@ -65,7 +65,7 @@ Taux de remplissage sur les 561 offres d'exploration. « Recodage » renvoie à 
 | Télétravail | binaire | dictionnaire v2, **validé** (§1.3) ; le site, lui, lit seulement le mot « télétravail » | 6,9 % (39 sur 565) | la v1 comptait les véhicules « hybrides » et « pas de télétravail possible » (8,4 %) ; mention ≠ droit : « possible après la période d'essai » |
 | Orientation commerciale | binaire | **codage par lecture** avec la grille `recherche/codage/a_coder/CODEBOOK.md` ; le dictionnaire est **rejeté** (§1.3) | ≈ 46 % (55 sur 120 à la lecture, pondéré par le plan de tirage) | frontière floue entre conseil et vente : la règle d'arbitrage est écrite dans la grille |
 | Horaires atypiques | binaire | dictionnaire (samedi, week-end, dimanche) + `contexteTravail.horaires` | 10,7 % | — |
-| Offre manquant de candidats (`offresManqueCandidats`) | binaire | direct, canal FT | 32 vraies sur 225 | **définition non documentée** : calculée pour l'offre ou pour le métier × territoire ? À établir avant tout usage |
+| Offre manquant de candidats (`offresManqueCandidats`) | binaire | direct, canal FT ; **à mesurer à un âge fixé** (§1.4) | 32 vraies sur 225 | **c'est un résultat, pas une caractéristique** : drapeau posé par France Travail quand l'offre a plus de 15 jours et moins de 4 candidatures connues (§1.4) |
 | Nombre de postes (`nombrePostes`) | quantitative discrète | **non** | 552 offres sur 561 valent 1 | pas de variance |
 | Date de création (`dateCreation`) | date | direct | 100 % | `dateActualisation` change sans que l'offre change |
 | Durée en ligne | quantitative continue, censurée | recodage : présence quotidienne dans `data/actives/` | 232 offres disparues en 15 jours ; 5 réapparues après une absence | disparaître ≠ être pourvue (annulée, expirée) ; offres créées avant le 22/09 : troncature à gauche |
@@ -94,6 +94,33 @@ Taux de remplissage sur les 561 offres d'exploration. « Recodage » renvoie à 
 
   *Exemple de ce que la validation attrape : une première version du dictionnaire « outil CRM nommé » cherchait `sage` ; elle comptait 21 % des offres, à cause de « repassage », « passage en caisse », « apprentissage ». Corrigée, elle en compte 1,2 %.*
 - **Unité d'analyse** : l'offre. Les doublons stricts (même intitulé, même employeur, même lieu) sont retirés comme au TD 1. Les offres d'un même employeur restent, avec des erreurs-types groupées par employeur (*cluster* = nom de l'employeur ; employeur anonyme = groupe par empreinte de la description).
+
+### 1.4 Ce que signifie `offresManqueCandidats`
+
+**Définition.** France Travail pose ce drapeau sur une **offre** quand elle a **plus de 15 jours et moins de 4 candidatures connues de France Travail**. Ni l'employeur ni le conseiller ne le saisissent. Sources :
+- l'interface candidat de France Travail, filtre « Soyez parmi les 1ers à postuler » (anciennement « Offres avec peu de candidats ») : *« Offres de plus de 15 jours, comptant moins de 4 candidatures (dont France Travail est informé) »* ;
+- le client open source hrflow-connectors, qui décrit le paramètre de recherche du même nom : *« Filters offers older than 15 days, with less than 4 applications (of which Pôle emploi is informed) »* ([`warehouse.py`](https://raw.githubusercontent.com/Riminder/hrflow-connectors/master/src/hrflow_connectors/v1/connectors/poleemploi/warehouse.py), vérifié le 06/10/2026) ;
+- l'application Mobiville de France Travail, qui lit le champ `offresManqueCandidats` et l'affiche avec ce même libellé.
+
+La spécification officielle de l'API n'est pas publique (la page francetravail.io répond 403 sans compte connecté). La définition reste donc à confirmer mot pour mot.
+
+**Ce que disent nos données** (1 336 offres du canal FT, 23 métiers, `python recherche/audit.py`) :
+- **jamais avant 15 jours** : aucune offre n'est marquée vraie avant 15 jours en ligne. Pour 119 des 228 offres marquées, la première version vue à « vrai » a 17 jours ;
+- **propre à chaque offre** : 167 offres changent de valeur entre deux versions, et 9 reviennent de « vrai » à « faux » quand des candidatures arrivent. Dans 111 des 285 couples métier × département, des offres ont des valeurs différentes : ce n'est donc pas un indicateur de « métier en tension » ;
+- **absent du canal partenaire** : aucune offre des sites partenaires ne porte le champ, ce qui cadre avec « dont France Travail est informé ».
+
+**Conséquences pour l'analyse.**
+1. Ce drapeau est un **résultat** (peu de candidatures), pas une caractéristique de l'offre à sa publication. Il ne peut pas servir de variable explicative du salaire. L'ancienne H14 (« les offres manquant de candidats affichent un salaire plus bas ») inversait le sens : elle est remplacée.
+2. Sa valeur dépend de l'âge de l'offre au moment où on la lit. On le mesure donc **à un âge fixé : à 21 jours**, sur la dernière version vue entre 21 et 28 jours. C'est possible parce que `data/brut/` garde chaque version.
+3. Seules les offres **encore en ligne à 21 jours** ont une valeur. Celles qui ont été pourvues ou retirées avant en sont exclues, ce qui crée un biais de survie. On le traite en lisant H14 avec H15 (durée en ligne) : « retirée avant 21 jours », « en ligne, ≥ 4 candidatures » et « en ligne, < 4 candidatures » sont trois issues d'une même offre.
+4. Il ne compte que les candidatures « dont France Travail est informé ». Une offre qui renvoie vers le site de l'employeur peut avoir beaucoup de candidats et rester marquée.
+
+**H14 révisée** (secondaire, contrôle du taux de fausses découvertes, §7) :
+- *Y* = drapeau à 21 jours (canal FT, offres en ligne à 21 jours) ;
+- *X* = salaire affiché, puis, parmi les offres qui en affichent, ln S ;
+- contrôles : contrat, expérience exigée, Île-de-France, agence, semaine de création.
+
+Test : Khi² puis régression logistique ; on rapporte l'odds ratio et l'effet marginal. Mécanisme : la recherche dirigée (un salaire affiché attire des candidatures), qui est aussi celui de H15. Elle reste secondaire tant que la définition n'est pas confirmée par la spécification officielle.
 
 ---
 
@@ -139,7 +166,7 @@ Chaque hypothèse part d'un mécanisme qui la rend plausible. Une hypothèse est
 | H11 | Le salaire diffère selon que l'offre mentionne le télétravail | différence compensatrice (le télétravail se paie par un salaire plus bas) **contre** sélection (le télétravail va aux postes plus qualifiés) | Moyenne pour D1415 (puissance) ; **forte sur la base élargie** |
 | H12 | Une langue étrangère demandée est associée à un salaire plus élevé | prime de compétence rare | Moyenne (n) ; base élargie |
 | H13 | Les CDI exigent plus souvent de l'expérience que les CDD et l'intérim | filtrage plus sévère quand l'embauche engage dans la durée (coûts de séparation) **contre** productivité immédiate exigée en mission courte | **Très forte** : variables complètes, deux prédictions opposées |
-| H14 | Les offres signalées « manquant de candidats » affichent un salaire plus bas | monopsone : un salaire bas attire moins de candidats | Moyenne : définition de l'indicateur inconnue ; si elle est calculée au niveau métier × territoire, l'hypothèse ne porte plus sur l'offre |
+| H14 | Les offres qui affichent un salaire sont moins souvent « peu de candidats » à 21 jours | recherche dirigée : un salaire affiché attire des candidatures (*à salaire affiché égal*, un salaire plus haut aussi) | **Forte, mais secondaire** : le drapeau est le seul signal du côté des candidats (moins de 4 candidatures après 15 jours, §1.4), mais sa définition vient de l'interface candidat et d'un client tiers, pas de la spécification officielle de l'API |
 | H15 | Les offres qui affichent un salaire disparaissent plus vite | recherche dirigée : un salaire affiché attire plus de candidatures et accélère le recrutement | **Forte** (originale, plus difficile) |
 | H16 | Les horaires atypiques (week-end) sont associés à un salaire plus élevé | différence compensatrice | Moyenne : mesure par dictionnaire, souvent « magasin ouvert le samedi » |
 | H17 | La qualification déclarée (employé qualifié vs non qualifié) se traduit par un salaire plus élevé | grilles conventionnelles **contre** tassement des premiers niveaux au SMIC | **Forte** ; le résultat nul est ici informatif : test d'équivalence |
@@ -312,7 +339,7 @@ Flux observé : 15,2 nouvelles offres D1415 par jour, soit **≈ 1 380 en 13 sem
 | H8 | Taille ↔ salaire | tranche ; S | ordinale × continue | Jonckheere-Terpstra ; modèle B | pas de tendance | tendance monotone | fort | moyenne (canal FT, n limite) | **3** |
 | H11 | Télétravail ↔ salaire | dictionnaire ; S | binaire × continue | Mann-Whitney ; régression, ROME en effet fixe | même distribution | décalage | fort | élevée (mesure) | 3, base élargie |
 | H12 | Langue étrangère ↔ salaire | dictionnaire ; S | binaire × continue | Mann-Whitney | idem | idem | moyen | moyenne | 4, base élargie |
-| H14 | Manque de candidats ↔ salaire | offresManqueCandidats ; S | binaire × continue | Mann-Whitney | idem | idem | moyen | élevée (définition) | 4 |
+| H14 | Salaire affiché ↔ « peu de candidats » à 21 jours | salaire affiché ; drapeau à J+21 | binaire × binaire | Khi² ; logit | indépendance | association | fort | élevée (âge fixé, survie jusqu'à J+21) | secondaire (FDR) |
 | H16 | Horaires atypiques ↔ salaire | dictionnaire ; S | binaire × continue | Mann-Whitney | idem | idem | moyen | moyenne | 4 |
 | H7 | Variable ↔ niveau du fixe | variable ; S | binaire × continue | Mann-Whitney | idem | fixe plus bas | moyen | élevée | 4 |
 | H5 | Débutant ↔ au plancher | experienceExige ; au plancher | binaire × binaire | Khi² | indépendance | association | moyen | faible | robustesse de H2 |
@@ -480,7 +507,7 @@ Flux observé : 15,2 nouvelles offres D1415 par jour, soit **≈ 1 380 en 13 sem
 ### 8.3 Ce qu'il reste à faire, dans l'ordre
 
 1. ~~Corriger la conversion horaire~~ : **fait** le 06/10/2026 (`scripts/resumer.py`, × 1 820).
-2. **Établir la définition de `offresManqueCandidats`** dans la documentation de l'API avant d'envisager H14.
+2. ~~Établir la définition de `offresManqueCandidats`~~ : **fait** le 06/10/2026 (§1.4). Reste à lire la spécification officielle de l'API (compte francetravail.io connecté) pour la confirmer mot pour mot.
 3. ~~Double codage de 120 offres~~ : **fait** le 06/10/2026 (§1.3). Dictionnaires gelés dans `recherche/audit.py` : télétravail v2, langue étrangère, horaires atypiques. Orientation commerciale : codage par lecture. **Reste** : le contre-codage humain de 30 offres.
 4. **Collecter** jusqu'au 05/01/2027 sans regarder les croisements. On peut contrôler la seule chose qui ne biaise pas les tests : que la collecte tourne et que les effectifs montent (`recherche/audit.py`).
 5. **Écrire le script d'analyse confirmatoire avant le 05/01/2027**, puis l'exécuter une fois.

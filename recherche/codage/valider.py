@@ -112,7 +112,7 @@ def main():
                       f"{pc(rappel)} | {k:.2f} | {verdict} |")
         erreurs = [(n, rx[n], ref[n]) for n in nums if rx[n] != ref[n]]
         if erreurs:
-            lignes.append(f"| | erreurs : " + ", ".join(
+            lignes.append("| | erreurs : " + ", ".join(
                 f"n°{n} ({'faux positif' if r else 'faux négatif'})" for n, r, _ in erreurs) + " | | | | |")
     lignes += ["", f"Seuils du protocole : précision ≥ {pc(SEUIL_PRECISION)}, rappel ≥ 70 %. "
                "Le rappel combine le taux de faux négatifs des 60 offres qu'aucun dictionnaire ne "
