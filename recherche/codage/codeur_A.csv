@@ -1,0 +1,111 @@
+num,id,teletravail,langue_etrangere,orientation_commerciale,horaires_atypiques,doute,note
+1,213QCQS,0,0,0,0,0,
+2,7095683,0,0,0,0,1,Commercial 0 mais hésitation : « Négocier les conditions commerciales avec les clients existants » sans vente explicite.
+3,7031192,0,0,0,0,0,
+4,213QPTY,0,0,0,0,0,
+5,213ZKKQ,0,0,1,0,0,comm: « plan de prospection pour la recherche de nouveaux clients »
+6,207WCJF,0,0,1,0,0,comm: « Prospection nouveaux clients » ; week-ends libres donc horaires 0
+7,6710585,0,0,1,0,0,comm: « concrétiser vos ventes » (conseiller de vente)
+8,5677580,1,1,0,0,1,tele: « use up to % of working hours as part of Smart Working » ; langue: « l'Anglais ou l'Allemand » ; doute: établir des offres sans vente explicite
+9,213MNPD,1,1,0,0,0,tele: « Accord télétravail et horaires flexibles » ; langue: « Votre anglais est courant »
+10,214BPMD,1,0,1,0,0,"tele: « Possibilité de télétravail à raison d'1 jour par semaine » ; comm: « Qualifier les opportunités commerciales », variable selon performance"
+11,213XBNB,0,0,0,0,1,"Horaires 0 (lundi-vendredi) mais doute : astreinte hors heures d'ouverture, week-end non précisé."
+12,214NPNF,0,0,1,0,1,"comm: « Promouvoir les offres et services du groupe », accompagne les « achats » ; doute sur vente explicite"
+13,7476616,0,0,1,1,1,"comm: « Chargé de Clientèle Télévente » ; hor: « le samedi de 8h à 18h », planning variable ; doute: samedi du service, pas explicitement du titulaire"
+14,214NSZF,0,1,0,0,0,langue: « La maîtrise de l'anglais constitue un véritable atout »
+15,7665690,0,0,0,0,0,
+16,7676278,0,0,0,0,1,Commercial 0 mais doute : « prime sur objectifs » et « taux de validation des contrats » sans vente explicite.
+17,6710841,0,0,1,0,0,comm: « concrétiser vos ventes » (conseiller de vente)
+18,213SGDP,0,1,0,0,1,"langue: « Vous êtes à l'aise en anglais » ; doute comm: qualification de prospects pour les commerciaux, sans vente"
+19,213TMMG,1,1,0,1,0,tele: « Télétravail possible après la phase de montée en compétences » ; langue: « Maîtrise courante de l'allemand » ; hor: « 2 week-ends travaillés par mois »
+20,210SLYH,0,1,1,1,0,comm: « Vendre en respectant les procédures et objectifs de vente » ; langue: « Maîtrise de l'anglais niveau B2 » ; hor: « roulement pouvant inclure des jours fériés et week-ends »
+21,3953545,0,0,1,0,0,comm: « Concrétiser la vente »
+22,214CFNL,0,0,0,0,0,
+23,6361514,1,1,1,0,0,tele: « Télétravail : Partiel (2 jours par semaine) » ; langue: « Anglais courant » ; comm: « opportunités d'upsell et de cross-sell »
+24,212QTWP,0,0,0,1,0,"hor: « Ouvert du lundi au dimanche, planning en roulement »"
+25,214HRGL,1,1,1,1,1,tele: « Télétravail occasionnel » ; langue: « Maîtrise de l'anglais est indispensable » ; comm: « assister dans la passation de commande » + variable ; hor: « 1 samedi sur 2 ou 3 travaillé » ; doute comm
+26,214BFKB,1,0,0,0,0,tele: « Télétravail possible (le mardi et le jeudi) à l'issue de la période d'essai »
+27,6945077,0,0,1,0,0,"comm: alternance « Titre pro conseiller de vente », « missions commerciales »"
+28,7095825,0,0,1,1,1,comm: « Renseignements sur les offres proposées et accroches commerciales » ; hor: « du lundi au samedi (selon planning) » ; doute comm
+29,214KNSZ,0,0,1,0,0,"comm: « Construire et enrichir tes listes de prospection », primes par rendez-vous ; 100 % présentiel"
+30,214CKDY,0,0,0,0,0,
+31,7389375,0,0,0,0,0,
+32,213HNVH,0,0,0,1,1,"hor: « de 8h30 à 16h30 le samedi » (amplitude du service, temps partiel : doute sur le titulaire)"
+33,6591602,0,0,1,0,0,"comm: alternance « Titre pro conseiller de vente », « missions commerciales »"
+34,214DTZD,0,0,1,0,0,comm: « conclure les ventes grâce à une écoute active »
+35,6848264,0,0,0,0,0,
+36,213RGCK,0,1,1,0,1,"langue: « La pratique courante de l'italien est indispensable » ; comm: « identifier les opportunités commerciales », « complétée par des commissions » ; doute comm"
+37,214DKVM,0,0,1,0,0,comm: « Vendre des appareils reconditionnés »
+38,7093523,0,0,1,0,1,comm: « vente de café et de goodies » ; doute: vente secondaire dans un poste de service en salle
+39,7516140,0,0,1,1,0,comm: « Prime sur les ventes additionnelles » ; hor: « horaires sont variables du lundi au samedi »
+40,213KHWB,1,1,0,1,0,tele: « Télétravail possible » ; langue: « Vous parlez anglais » ; hor: « Astreinte le samedi 1 fois par mois »
+41,5882363,0,0,1,0,0,comm: « participerez activement à la vente de chaussures »
+42,6944111,0,1,1,0,0,langue: « La maitrise de l'anglais ou de l'espagnol est un plus » ; comm: « développer le CA et réaliser les objectifs fixés »
+43,212VWCK,0,0,1,0,0,comm: « Contacter et convertir des prospects »
+44,7399043,0,0,1,0,1,comm: « vente de café et de goodies » ; doute: vente secondaire dans un poste de supervision de salle
+45,6576185,0,0,0,0,0,
+46,214CLMK,0,0,0,0,1,Commercial 0 mais doute : « vente » citée seulement comme objet possible d'appel.
+47,214LYXK,0,1,1,1,0,langue: « Anglais courant indispensable » ; comm: « Prospecter et développer un réseau de partenaires » ; hor: « Travail fréquent les WE »
+48,213DRFY,0,0,0,0,1,Commercial 0 mais doute : « Contribuer au développement du portefeuille clients » sans vente explicite.
+49,6690894,1,1,1,0,1,tele: « télétravail possible à partir du . » ; langue: « La pratique de l'anglais est un plus » ; comm: « Gestion commerciale et ventes additionnelles » (formation) ; doute comm
+50,6710693,0,0,1,0,0,comm: « concrétiser vos ventes » (conseiller de vente)
+51,213WNWF,0,0,0,0,1,"Commercial 0 mais doute : « suivi des demandes commerciales », « dans une démarche commerciale » sans vente explicite."
+52,6744712,1,0,0,0,0,tele: « poste éligible au télétravail (à partir de 6 mois d'ancienneté »
+53,214LCXN,0,0,1,0,0,"comm: « Réaliser les activités de vente », « Suivre les devis avec pour objectif de les convertir »"
+54,214SDPT,0,1,1,1,0,"langue: « Vous êtes à l'aise avec l'anglais » ; comm: « le conseiller et assurer la vente » ; hor: « travail organisé le week-end, en soirée et les jours fériés »"
+55,7406465,0,1,0,0,0,langue: « disposant d'un bon niveau d'anglais »
+56,213ZVCH,0,0,0,1,0,hor: « Un samedi travaillé par mois »
+57,6881744,0,0,1,0,0,"comm: « Accueil, conseil et vente aux clients »"
+58,7450804,0,0,0,0,0,
+59,214PRRX,0,0,0,0,0,
+60,6270416,0,0,0,1,0,hor: « Le samedi : 8h50 - 12h30 »
+61,214CLVG,0,0,1,0,0,"comm: « respecter le process de vente Shiva, convertir vos prospects »"
+62,6966387,0,0,1,0,1,"comm: « Promouvoir les offres et services », « Détecter les opportunités commerciales » ; doute: guichet postal"
+63,213TMSC,0,1,0,1,0,langue: « Anglais oral impératif » ; hor: « Horaires flexibles incluant régulièrement les week-ends et jours fériés »
+64,213MSXJ,0,1,1,1,0,langue: « Maitrise de plusieurs langues : anglais et espagnol » ; comm: « Développement commercial & vente de mobil-homes » ; hor: « travail les week-ends et jours fériés »
+65,213VMQS,0,0,0,0,0,
+66,214HQRP,0,0,1,0,1,comm: « campagnes d'appels sortants pour soutenir et promouvoir les prestations » ; doute: promotion sans vente conclue
+67,7165182,0,0,0,0,0,
+68,7095684,0,0,0,0,1,Commercial 0 mais doute : « Proposer les produits et services adaptés » sans vente explicite.
+69,7514746,0,0,1,0,1,comm: « la vente de café et de produits dérivés (goodies) » ; doute: vente secondaire
+70,6966412,0,0,1,0,1,"comm: « Promouvoir les offres et services », « Détecter les opportunités commerciales » ; doute: guichet postal"
+71,6882057,0,0,1,0,0,comm: « Réaliser les ventes et contribuer activement à l'atteinte des objectifs commerciaux »
+72,7518038,1,0,0,1,0,tele: « le samedi de 9h à 13h en télétravail » ; hor: idem samedi travaillé
+73,6944855,0,0,1,0,0,"comm: alternance « Titre pro conseiller de vente », « missions commerciales »"
+74,7665783,0,0,0,0,0,
+75,7348130,1,0,0,0,0,tele: « 2 jours de télétravail par semaine »
+76,212TSZH,0,0,0,0,0,
+77,214JQKT,0,0,0,0,0,
+78,213CRYT,0,0,1,0,0,"comm: « Suivi commercial et relance des prospects », « développement du chiffre d'affaires »"
+79,213WMRN,0,1,0,0,0,"langue: « Vous maîtrisez l'anglais, aussi bien à l'oral qu'à l'écrit »"
+80,5202824,1,0,0,0,0,tele: « jusqu'à 10 jours de télétravail/mois »
+81,6944056,0,0,1,0,0,"comm: « Relation client et vente », « Mise en avant des offres commerciales »"
+82,4590618,0,0,0,1,0,hor: « 1 samedi matin sur 4 travaillé »
+83,213WPJD,0,0,0,0,0,
+84,6688737,0,0,0,0,1,Horaires 0 mais doute : « horaires de journée en roulement » sans mention du week-end (service de dépannage).
+85,213LQWB,0,1,0,0,0,langue: « La maîtrise de l'anglais professionnel est requise »
+86,3953523,0,0,1,0,0,comm: « Concrétiser la vente »
+87,6782139,1,0,0,0,0,tele: « Télétravail possible (maximum 2 jours par semaine) »
+88,213MXKB,0,0,0,0,0,
+89,213JSNT,1,0,1,0,0,tele: « Un jour de télétravail hebdomadaire » ; comm: « Téléprospection BtoB et prise de rendez-vous pour nos commerciaux »
+90,7096495,0,0,0,0,0,
+91,213WJGT,0,1,0,1,0,langue: « Vous maîtrisez l'Allemand ou Néerlandais niveau B2 minimum » ; hor: « Du lundi au samedi de 9h à 19h »
+92,214PRPL,0,0,0,0,0,
+93,212QSJV,1,0,0,0,0,tele: « 100 % télétravail »
+94,213YLKG,0,0,0,1,0,hor: « Travail tous les samedis »
+95,6881547,0,0,1,0,0,"comm: « Réaliser des ventes complémentaires », primes sur objectifs"
+96,7517353,0,0,0,0,0,
+97,211KYCT,0,0,0,1,0,"hor: « Travail réparti sur cinq jours, du lundi au samedi »"
+98,7061294,0,0,1,0,1,"comm: « Réalisation des ventes et encaissement » ; doute hor: « du mardi au samedi » concerne la présence de la responsable, pas le planning"
+99,214CHBD,0,0,0,0,1,"Commercial 0 mais doute : « Participer au développement de l'activité commerciale après-vente », primes sur objectif."
+100,214SNXN,0,1,0,0,0,langue: « Anglais requis (niveau B2) » ; « pas de télétravail possible »
+101,214HKRR,0,0,0,0,1,"Commercial 0 mais doute : « suivi commercial quotidien des affaires », « Relancer les offres et devis » sans vente explicite."
+102,6881737,0,0,1,0,0,"comm: conseiller de vente, « Animer le plan de vente »"
+103,213MPPT,0,0,1,0,0,"comm: « Contribuer au chiffre d'affaires », offres « dans le respect des objectifs de marge »"
+104,7095446,0,0,1,1,0,comm: « Effectuer des opérations de vente et de conseil » ; hor: « Contrat de 35h sur 6 jours travaillés »
+105,6531674,1,0,0,0,0,tele: « présentiel avec 1 jour de télétravail/semaine »
+106,6710646,0,0,1,1,0,comm: « atteindre et même dépasser vos objectifs commerciaux » ; hor: « Travail le samedi »
+107,7565460,1,1,0,0,0,tele: « Travail à domicile occasionnel » ; langue: « Anglais (Requis) »
+108,213LQVG,0,1,0,0,0,langue: « La maîtrise de l'anglais professionnel est requise »
+109,214PHSZ,0,0,0,1,1,hor: « Horaires du lundi au samedi inclus (1 samedi sur 2 en repos) » ; doute comm: « proposer les produits et services adaptés »
+110,214NRQS,0,0,0,0,0,

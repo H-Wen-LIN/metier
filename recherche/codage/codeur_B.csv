@@ -1,0 +1,121 @@
+num,id,teletravail,langue_etrangere,orientation_commerciale,horaires_atypiques,doute,note
+1,213QCQS,0,0,0,0,0,
+2,7095683,0,0,1,0,1,"Commerciale: ""Négocier les conditions commerciales avec les clients existants"" mais poste surtout service client."
+3,7031192,0,0,0,0,0,
+4,213QPTY,0,0,0,0,0,
+5,213ZKKQ,0,0,1,0,0,"""plan de prospection pour la recherche de nouveaux clients"""
+6,207WCJF,0,0,1,0,0,"""Prospection nouveaux clients""; ""Argumenter les ventes""; week-ends libres"
+7,6710585,0,0,1,0,0,"""concrétiser vos ventes"" (conseiller de vente)"
+8,5677580,1,1,1,0,1,"Tel: ""Smart Working"" (pourcentage vide); langue: ""Français et l'Anglais ou l'Allemand""; com: participe ""aux négociations commerciales"" occasionnellement, poste back office."
+9,213MNPD,1,1,0,0,0,"""Accord télétravail""; ""Votre anglais est courant"""
+10,214BPMD,1,0,1,0,0,"""télétravail à raison d'1 jour par semaine""; ""Commercial Sédentaire"", variable sur performance"
+11,213XBNB,0,0,0,0,1,Astreinte hors heures d'ouverture mentionnée sans précision week-end; horaires lundi-vendredi.
+12,214NPNF,0,0,1,0,1,"""proposer les services adaptés. Promouvoir les offres et services du groupe"" - vente peu explicite."
+13,7476616,0,0,1,1,1,"""Télévente""; ""le samedi de 8h à 18h"", planning variable: samedi probablement travaillé mais non certain."
+14,214NSZF,0,1,0,0,0,"""La maîtrise de l'anglais constitue un véritable atout"""
+15,7665690,0,0,0,0,0,
+16,7676278,0,0,0,0,1,"Conseils sur produits, prime sur objectifs, taux de validation des contrats, mais pas de vente explicite; lundi-vendredi."
+17,6710841,0,0,1,0,0,"""concrétiser vos ventes"" (conseiller de vente)"
+18,213SGDP,0,1,0,0,1,"Langue: ""Vous êtes à l'aise en anglais""; com: qualification de prospects et opportunités commerciales, sans vente explicite."
+19,213TMMG,1,1,0,1,0,"""Télétravail possible après la phase de montée en compétences""; ""Maîtrise courante de l'allemand""; ""2 week-ends travaillés par mois"""
+20,210SLYH,0,1,1,1,0,"""Vendre en respectant les procédures et objectifs de vente""; ""Maîtrise de l'anglais niveau B2""; ""du lundi au samedi"", dimanche/férié"
+21,3953545,0,0,1,0,0,"""Concrétiser la vente""; ""développement des ventes de produits et services"""
+22,214CFNL,0,0,0,0,0,
+23,6361514,1,1,1,0,0,"""Télétravail : Partiel (2 jours par semaine)""; ""Anglais courant""; ""opportunités d'upsell et de cross-sell"""
+24,212QTWP,0,0,0,1,0,"""Ouvert du lundi au dimanche, planning en roulement"""
+25,214HRGL,1,1,1,1,1,"""Télétravail occasionnel""; ""Maîtrise de l'anglais indispensable""; ""1 samedi sur 2 ou 3 travaillé""; com: conseil et prise de commande + variable, vente non explicite; horaires contradictoires (lundi-vendredi flexible)."
+26,214BFKB,1,0,0,0,1,"""Télétravail possible (le mardi et le jeudi)""; prime sur objectifs mais service client sans vente."
+27,6945077,0,0,1,0,0,"Alternant ""conseiller de vente""; ""missions commerciales"""
+28,7095825,0,0,1,1,1,"""du lundi au samedi (selon planning)""; com: ""accroches commerciales"" seule mention de vente."
+29,214KNSZ,0,0,1,0,0,"""décroches des rendez-vous qualifiés""; prospection téléphonique; ""100 % présentiel"""
+30,214CKDY,0,0,0,0,0,
+31,7389375,0,0,0,0,0,
+32,213HNVH,0,0,0,1,1,"""le samedi de 8h30 à 16h30"" est l'amplitude du service, pas explicitement le planning du poste (temps partiel)."
+33,6591602,0,0,1,0,0,"Alternant ""conseiller de vente""; ""missions commerciales"""
+34,214DTZD,0,0,1,0,0,"""conclure les ventes grâce à une écoute active""; ""Du lundi au jeudi"""
+35,6848264,0,0,0,0,0,
+36,213RGCK,0,1,1,0,0,"""bilingue italien""; ""identifier les opportunités commerciales""; ""complétée par des commissions"""
+37,214DKVM,0,0,1,0,0,"""Vendre des appareils reconditionnés"""
+38,7093523,0,0,1,0,1,"""vente de café et de goodies"" parmi les tâches de service en salle; vente peu centrale."
+39,7516140,0,0,1,1,0,"""Prime sur les ventes additionnelles""; ""du lundi au samedi"", dimanche volontaire"
+40,213KHWB,1,1,0,1,0,"""Télétravail possible""; ""Vous parlez anglais"" + 2e langue; ""Astreinte le samedi 1 fois par mois"""
+41,5882363,0,0,1,0,0,"""participerez activement à la vente de chaussures""; ""atteinte des objectifs du magasin"""
+42,6944111,0,1,1,0,0,"""développer le CA et réaliser les objectifs fixés""; ""anglais ou de l'espagnol est un plus"""
+43,212VWCK,0,0,1,0,0,"""Contacter et convertir des prospects""; ""du lundi au vendredi"""
+44,7399043,0,0,1,0,1,"""vente de café et de goodies"" parmi les tâches de service en salle; vente peu centrale."
+45,6576185,0,0,0,0,0,Remonte les besoins aux équipes commerciales sans vendre.
+46,214CLMK,0,0,0,0,0,
+47,214LYXK,0,1,1,1,0,"""Anglais courant indispensable""; ""Prospecter et développer un réseau de partenaires""; ""Travail fréquent les WE"""
+48,213DRFY,0,0,0,0,1,"""Contribuer au développement du portefeuille clients"" sans vente ni objectif de vente explicite."
+49,6690894,1,1,1,0,1,"""télétravail possible""; ""anglais est un plus""; com: formation ""ventes additionnelles"" mais poste ADV, lundi-vendredi."
+50,6710693,0,0,1,0,0,"""concrétiser vos ventes"" (conseiller de vente)"
+51,213WNWF,0,0,1,0,1,"""identifier les solutions... dans une démarche commerciale""; poste de suivi de demandes, vente peu explicite."
+52,6744712,1,0,0,0,0,"""poste éligible au télétravail"""
+53,214LCXN,0,0,1,0,0,"""Suivre les devis avec pour objectif de les convertir""; ""Réaliser les activités de vente"""
+54,214SDPT,0,1,1,1,0,"""assurer la vente""; ""à l'aise avec l'anglais""; ""week-end, en soirée et les jours fériés en rotation"""
+55,7406465,0,1,0,0,0,"""en français et en anglais"" avec les clients"
+56,213ZVCH,0,0,0,1,0,"""Un samedi travaillé par mois"""
+57,6881744,0,0,1,0,0,"""Accueil, conseil et vente aux clients"""
+58,7450804,0,0,0,0,1,"Responsable de magasin relation client, ""atteindre (et dépasser) vos objectifs"" sans précision commerciale."
+59,214PRRX,0,0,0,0,0,
+60,6270416,0,0,0,1,0,"""Le samedi : 8h50 - 12h30"""
+61,214CLVG,0,0,1,0,0,"""convertir vos prospects""; ""respecter le process de vente"""
+62,6966387,0,0,1,0,0,"""Détecter les opportunités commerciales""; ""atteinte des objectifs de l'agence"""
+63,213TMSC,0,1,0,1,0,"""Anglais oral impératif""; ""incluant régulièrement les week-ends et jours fériés"""
+64,213MSXJ,0,1,1,1,0,"""anglais et espagnol""; ""prime sur les ventes de mobil-homes""; ""travail les week-ends et jours fériés"""
+65,213VMQS,0,0,0,0,1,"""sensibilité commerciale"" et opportunités, mais missions de suivi de commandes sans vente explicite; lundi-vendredi."
+66,214HQRP,0,0,1,0,0,"""campagnes d'appels sortants pour... promouvoir les prestations""; ""priorités commerciales"""
+67,7165182,0,0,0,0,0,"Offre précise: ""ne contiennent pas de vente""."
+68,7095684,0,0,1,0,1,"""Proposer les produits et services adaptés"" - vente non nommée explicitement."
+69,7514746,0,0,1,0,1,"""vente de café et de produits dérivés (goodies)"" parmi les tâches de service en salle; vente peu centrale."
+70,6966412,0,0,1,0,0,"""Détecter les opportunités commerciales""; ""atteinte des objectifs de l'agence"""
+71,6882057,0,0,1,0,0,"""Réaliser les ventes""; ""objectifs commerciaux"""
+72,7518038,1,0,0,1,0,"""le samedi de 9h à 13h en télétravail"""
+73,6944855,0,0,1,0,0,"Alternant ""conseiller de vente""; ""missions commerciales"""
+74,7665783,0,0,0,0,0,
+75,7348130,1,0,0,0,0,"""2 jours de télétravail par semaine"""
+76,212TSZH,0,0,0,0,0,
+77,214JQKT,0,0,0,0,0,
+78,213CRYT,0,0,1,0,0,"""fort tempérament commercial""; ""Participation au développement du chiffre d'affaires"""
+79,213WMRN,0,1,0,0,0,"""Vous maîtrisez l'anglais, aussi bien à l'oral qu'à l'écrit"""
+80,5202824,1,0,0,0,0,"""jusqu'à 10 jours de télétravail/mois"""
+81,6944056,0,0,1,0,0,"Apprenti ""conseiller(ère) de vente""; ""Mise en avant des offres commerciales"""
+82,4590618,0,0,1,1,1,"""1 samedi matin sur 4 travaillé""; com: conseil sur prestations et devis, ""relation commerciale"", vente non explicite."
+83,213WPJD,0,0,0,0,0,
+84,6688737,0,0,0,0,0,
+85,213LQWB,0,1,0,0,0,"""maîtrise de l'anglais professionnel est requise"""
+86,3953523,0,0,1,0,0,"""Concrétiser la vente""; ""développement des ventes de produits"""
+87,6782139,1,0,0,0,0,"""Télétravail possible (maximum 2 jours par semaine)"""
+88,213MXKB,0,0,0,0,0,
+89,213JSNT,1,0,1,0,0,"""Un jour de télétravail hebdomadaire""; ""Téléprospection BtoB et prise de rendez-vous"""
+90,7096495,0,0,0,0,1,"""Promotion de l'agence en ligne"" et souscription, mais pas de vente ni objectif commercial explicite."
+91,213WJGT,0,1,0,1,0,"""Allemand ou Néerlandais niveau B2 minimum""; ""Du lundi au samedi de 9h à 19h"""
+92,214PRPL,0,0,0,0,1,"""établissement des devis et offres commerciales"" mais poste administratif SAV."
+93,212QSJV,1,0,0,0,0,"""100 % télétravail"""
+94,213YLKG,0,0,0,1,0,"""Travail tous les samedis"""
+95,6881547,0,0,1,0,0,"""Réaliser des ventes complémentaires""; ""Primes sur objectifs"""
+96,7517353,0,0,0,0,1,"""atteindre les objectifs fixés"" sans précision de vente."
+97,211KYCT,0,0,0,1,0,"""du lundi au samedi, dans l'amplitude 10 h 00-19 h 00"""
+98,7061294,0,0,1,0,0,"""Réalisation des ventes et encaissement"""
+99,214CHBD,0,0,1,0,1,"""Participer au développement de l'activité commerciale après-vente""; ""qualités commerciales""; poste surtout réception atelier."
+100,214SNXN,0,1,0,0,0,"""Anglais requis (niveau B2)""; ""pas de télétravail possible"""
+101,214HKRR,0,0,1,0,1,"""Relancer les offres et devis""; ""pipeline de vente""; ""suivi commercial"" mais poste grands comptes de suivi."
+102,6881737,0,0,1,0,0,"Alternant conseiller de vente; ""Animer le plan de vente""; ""actions commerciales"""
+103,213MPPT,0,0,1,0,0,"""Contribuer au chiffre d'affaires""; ""Construire, présenter et relancer les offres commerciales"""
+104,7095446,0,0,1,0,1,"""Effectuer des opérations de vente et de conseil""; ""35h sur 6 jours travaillés"" sans citer samedi: horaires atypiques non explicites."
+105,6531674,1,0,0,0,0,"""1 jour de télétravail/semaine"""
+106,6710646,0,0,1,1,0,"""aller chercher du chiffre d'affaires""; conseiller de vente; ""Travail le samedi"""
+107,7565460,1,1,0,0,1,"""Anglais (Requis)""; tel: ""Travail à domicile occasionnel"" dans avantages mais ""En présentiel""; ""suivi administratif des ventes"" seulement."
+108,213LQVG,0,1,0,0,0,"""maîtrise de l'anglais professionnel est requise"""
+109,214PHSZ,0,0,1,1,1,"""1 samedi sur 2 en repos"" donc samedis travaillés; com: ""proposer les produits et services adaptés"" sans vente nommée."
+110,214NRQS,0,0,0,0,0,
+111,213HHHY,0,0,1,0,0,"""développement commercial""; ""campagnes d'appels sortants"" de qualification de prospects"
+112,214VTJZ,0,0,0,0,1,"""établissement des devis et offres commerciales"" mais poste administratif SAV."
+113,5947269,1,0,0,0,0,"""possibilité de télétravailler (après la période de formation)"""
+114,214PHSC,0,0,0,1,0,"""35 heures du lundi au samedi"""
+115,213LKZX,0,0,0,0,0,
+116,214DHQK,0,0,0,0,0,
+117,6882049,0,0,1,1,0,"""Réaliser des ventes complémentaires""; ""horaires magasin avec week-ends inclus"""
+118,6710662,0,0,1,0,0,"""concrétiser vos ventes"" (conseiller de vente)"
+119,6943834,0,0,1,0,1,"""Participer à l'élaboration des plans d'action pour améliorer les ventes""; assistant manager, vente indirecte."
+120,7569221,0,0,0,0,0,
