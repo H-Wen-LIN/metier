@@ -82,7 +82,7 @@ pour ne pas les compter deux fois.
 
 | API | Gratuite ? | Pourquoi elle sort |
 |---|---|---|
-| Adzuna | ✅ avec quota | Filtrage par mots-clés (`what`, `what_exclude`), lieu en texte (`where`), catégories maison, `permanent` / `contract`, `salary_min`, `max_days_old` : pas de code ROME ni de code INSEE. La plus proche : à reprendre si l'on accepte une requête par mots-clés |
+| Adzuna | ✅ avec quota | Filtrage par mots-clés (`what`, `what_exclude`), lieu en texte (`where`), catégories maison, `permanent` / `contract`, `salary_min`, `max_days_old` : pas de code ROME ni de code INSEE. La plus proche : à reprendre si l'on accepte une requête par mots-clés (voir [`guide-adzuna.md`](guide-adzuna.md), CGU comprises) |
 | Careerjet / Optioncarriere | ✅ rémunérée au clic | Mots-clés, lieu en texte, type de contrat seulement ; il faut un site éditeur et transmettre l'IP et le user-agent de chaque visiteur |
 | Jooble | ⚠️ clé après validation, quota gratuit très faible | Mots-clés et lieu seulement |
 | Talent.com, Jobijoba | ❌ sur contrat ou sur demande | Pas d'inscription en libre-service |
