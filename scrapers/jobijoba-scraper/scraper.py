@@ -190,8 +190,11 @@ def filtrer_par_anciennete(offres, max_mois):
     """Garde les offres publiées depuis moins de max_mois mois (0 = pas de filtre)."""
     aujourd_hui = date.today()
     for offre in offres:
-        if offre["date"]:
+        offre["anciennete_jours"] = ""
+        try:
             offre["anciennete_jours"] = (aujourd_hui - date.fromisoformat(offre["date"])).days
+        except ValueError:
+            offre["date"] = ""
     if not max_mois:
         return offres
     limite = date_limite(max_mois, aujourd_hui).isoformat()
@@ -276,7 +279,7 @@ def scraper_recherche(session, regles, mot_cle, ville, pages, offres, vues, spon
             offre["recherche"] = recherche
             offres.append(offre)
             nouvelles += 1
-        print(f"  {nouvelles} nouvelles offres")
+        print(f"  {nouvelles} offres récupérées")
 
         params = page_suivante(soup, etat)
         if nouvelles == 0 or params is None:
@@ -319,11 +322,14 @@ def extraire_details(html):
     return {"description": "\n\n".join(b.get_text("\n", strip=True) for b in blocs)}
 
 
-def ajouter_details(session, regles, offres):
-    a_lire = [o for o in offres if "/annonce/" in o["url"] and robots_autorise(regles, o["url"])]
-    print(f"Lecture du détail de {len(a_lire)} offres (environ {len(a_lire) * DELAI_DETAILS_SECONDES // 60 + 1} min)…")
+def ajouter_details(session, regles, offres, deja_lues=()):
+    a_lire = [o for o in offres if "/annonce/" in o["url"] and o["url"] not in deja_lues
+              and robots_autorise(regles, o["url"])]
     for o in offres:
         o.update(dict.fromkeys(COLONNES_DETAILS, ""))
+    if not a_lire:
+        return
+    print(f"Lecture du détail de {len(a_lire)} offres (environ {len(a_lire) * DELAI_DETAILS_SECONDES // 60 + 1} min)…")
     for i, offre in enumerate(a_lire, 1):
         if i > 1:
             time.sleep(DELAI_DETAILS_SECONDES)
@@ -340,10 +346,75 @@ def ajouter_details(session, regles, offres):
             print(f"  {i}/{len(a_lire)}")
 
 
+# --- Mise à jour d'un CSV existant (option --mise-a-jour) ---------------------
+
+COLONNES_SUIVI = ["premiere_vue", "derniere_vue", "statut"]
+
+
+def cle_offre(offre):
+    return offre.get("url") or "|".join(offre.get(c, "") for c in ("titre", "entreprise", "lieu"))
+
+
+def lire_csv(chemin):
+    if not os.path.exists(chemin):
+        return []
+    with open(chemin, newline="", encoding="utf-8-sig") as f:
+        return list(csv.DictReader(f, delimiter=";"))
+
+
+def fusionner(anciennes, nouvelles, champ_zone):
+    """Fusionne les offres du jour avec celles du CSV existant.
+
+    - offre déjà connue : mise à jour, en gardant sa date de première apparition,
+      sa date de publication et les informations déjà récupérées ;
+    - offre nouvelle : ajoutée ;
+    - offre connue absente aujourd'hui alors que sa recherche/page a été relue :
+      gardée avec le statut « non retrouvée » (expirée, ou simplement plus dans
+      les premières pages de résultats).
+    """
+    aujourd_hui = date.today().isoformat()
+    par_cle = {cle_offre(o): o for o in anciennes}
+    zones_relues = {o.get(champ_zone, "") for o in nouvelles}
+    resultat, vues, nb_nouvelles = [], set(), 0
+
+    for offre in nouvelles:
+        cle = cle_offre(offre)
+        if cle in vues:
+            continue
+        vues.add(cle)
+        ancienne = par_cle.get(cle)
+        if ancienne:
+            for champ, valeur in ancienne.items():
+                if valeur and offre.get(champ) in ("", None):
+                    offre[champ] = valeur
+            if ancienne.get("date"):
+                offre["date"] = ancienne["date"]
+        else:
+            nb_nouvelles += 1
+        offre["premiere_vue"] = (ancienne or {}).get("premiere_vue") or aujourd_hui
+        offre["derniere_vue"] = aujourd_hui
+        offre["statut"] = "en ligne"
+        resultat.append(offre)
+
+    nb_non_retrouvees = 0
+    for cle, ancienne in par_cle.items():
+        if cle in vues:
+            continue
+        if ancienne.get(champ_zone, "") in zones_relues and ancienne.get("statut") != "non retrouvée":
+            ancienne["statut"] = "non retrouvée"
+            nb_non_retrouvees += 1
+        resultat.append(ancienne)
+
+    print(f"Mise à jour : {nb_nouvelles} nouvelles offres, {len(nouvelles) - nb_nouvelles} déjà connues, "
+          f"{nb_non_retrouvees} non retrouvées aujourd'hui")
+    resultat.sort(key=lambda o: o.get("date") or "", reverse=True)
+    return resultat
+
+
 # --- Programme principal ------------------------------------------------------
 
 def scraper(mot_cle, villes=None, pages=1, details=False, sponsorises=True,
-            max_mois=MAX_MOIS_DEFAUT):
+            max_mois=MAX_MOIS_DEFAUT, deja_lues=()):
     session = requests.Session()
     session.headers["User-Agent"] = USER_AGENT
     offres, vues = [], set()
@@ -361,7 +432,7 @@ def scraper(mot_cle, villes=None, pages=1, details=False, sponsorises=True,
     # Filtre une première fois avant --details pour ne pas ouvrir d'offres trop anciennes
     offres = filtrer_par_anciennete(offres, max_mois)
     if details and offres:
-        ajouter_details(session, regles, offres)
+        ajouter_details(session, regles, offres, deja_lues)
         offres = filtrer_par_anciennete(offres, max_mois)
     return offres
 
@@ -371,10 +442,21 @@ def enregistrer_csv(offres, chemin):
         print("Aucune offre à enregistrer.")
         return
     os.makedirs(os.path.dirname(chemin) or ".", exist_ok=True)
-    with open(chemin, "w", newline="", encoding="utf-8-sig") as f:
-        writer = csv.DictWriter(f, fieldnames=offres[0].keys(), delimiter=";")
+    colonnes = list(COLONNES)
+    for offre in offres:  # toutes les colonnes rencontrées, dans l'ordre
+        colonnes += [c for c in offre if c not in colonnes]
+    # Écrit dans un fichier temporaire puis remplace : l'ancien CSV reste intact en cas d'erreur
+    temporaire = chemin + ".tmp"
+    with open(temporaire, "w", newline="", encoding="utf-8-sig") as f:
+        writer = csv.DictWriter(f, fieldnames=colonnes, delimiter=";", restval="")
         writer.writeheader()
         writer.writerows(offres)
+    try:
+        os.replace(temporaire, chemin)
+    except PermissionError:
+        os.remove(temporaire)
+        print(f"Impossible d'écrire {chemin} : est-il ouvert dans Excel ? Fermez-le et relancez.")
+        return
     print(f"{len(offres)} offres enregistrées dans {chemin}")
 
 
@@ -392,12 +474,20 @@ def main():
                    help="Ignore les offres sponsorisées (souvent sans rapport avec la recherche)")
     p.add_argument("--max-mois", type=int, default=MAX_MOIS_DEFAUT,
                    help=f"Écarte les offres publiées il y a plus de N mois ({MAX_MOIS_DEFAUT} par défaut, 0 = toutes)")
+    p.add_argument("--mise-a-jour", action="store_true",
+                   help="Met à jour le CSV de sortie existant au lieu de le remplacer")
     p.add_argument("--sortie", default="data/offres.csv", help="Fichier CSV de sortie")
     args = p.parse_args()
 
     pages = min(max(args.pages, 1), PAGES_MAX)
+    max_mois = max(args.max_mois, 0)
+    anciennes = lire_csv(args.sortie) if args.mise_a_jour else []
+    # En mise à jour, les offres déjà détaillées ne sont pas rouvertes
+    deja_lues = {o["url"] for o in anciennes if o.get("description")}
     offres = scraper(args.mot_cle, args.ville, pages, args.details, not args.sans_sponsorises,
-                     max(args.max_mois, 0))
+                     max_mois, deja_lues)
+    if args.mise_a_jour:
+        offres = filtrer_par_anciennete(fusionner(anciennes, offres, "recherche"), max_mois)
     enregistrer_csv(offres, args.sortie)
 
 

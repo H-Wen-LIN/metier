@@ -30,6 +30,7 @@ Options :
 - `pages` : un ou plusieurs noms de page ou URL complètes (obligatoire)
 - `--suivre` : visite aussi jusqu'à N pages « emploi » liées depuis les pages données, 20 au maximum (0 par défaut)
 - `--max-mois` : écarte les offres publiées il y a plus de N mois (6 par défaut, `--max-mois 12` pour un an, `--max-mois 0` pour tout garder). La date utilisée est la date exacte de publication fournie par le site.
+- `--mise-a-jour` : complète le CSV existant au lieu de le remplacer. Ajoute les colonnes `premiere_vue`, `derniere_vue` et `statut` (`en ligne` / `non retrouvée`). Pour l'automatiser chaque jour, voir [le README du dossier `scrapers/`](../README.md).
 - `--sortie` : chemin du fichier CSV (`data/offres_wttj.csv` par défaut)
 
 Chaque page fournit ses 20 offres les plus récentes. Le site affiche d'autres pages de résultats (`?page=2`…), mais son `robots.txt` interdit les URL avec paramètres (`Disallow: /*?`) : le script ne les visite pas. Pour obtenir plus d'offres, donnez plusieurs pages (autres métiers proches, autres villes) ou utilisez `--suivre`. Si une page renvoie 0 offre, vérifiez son nom sur le site.

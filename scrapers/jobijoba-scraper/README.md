@@ -28,6 +28,7 @@ Options :
 - `--sans-sponsorises` : ignore les offres sponsorisées, souvent sans rapport avec la recherche
 - `--details` : ouvre la page de chaque offre pour récupérer la description complète, la date de publication et d'expiration, le code postal, la région et le salaire chiffré (plus lent : 2 secondes par offre)
 - `--max-mois` : écarte les offres publiées il y a plus de N mois (6 par défaut, `--max-mois 12` pour un an, `--max-mois 0` pour tout garder)
+- `--mise-a-jour` : complète le CSV existant au lieu de le remplacer. Ajoute les colonnes `premiere_vue`, `derniere_vue` et `statut` (`en ligne` / `non retrouvée`). Pour l'automatiser chaque jour, voir [le README du dossier `scrapers/`](../README.md).
 - `--sortie` : chemin du fichier CSV (`data/offres.csv` par défaut)
 
 Le CSV (séparateur `;`, ouvrable dans Excel) contient pour chaque offre : titre, métier, catégorie, lieu, contrat, entreprise, salaire, télétravail, date de publication (AAAA-MM-JJ), ancienneté en jours, date telle qu'affichée, résumé, offre sponsorisée ou non, recherche d'origine et lien vers l'annonce. Avec `--details` s'ajoutent : date de publication, date d'expiration, code postal, région, salaire min, salaire max, période du salaire, temps de travail et description complète. Certaines offres reprises d'autres sites n'ont que la description.
