@@ -34,8 +34,10 @@ jobs:
 
       # Adzuna : seconde source, gardée à part dans data/adzuna/ (voir guide-adzuna.md).
       # Sans les secrets ADZUNA_APP_ID / ADZUNA_APP_KEY, le script ne fait rien ;
-      # s'il échoue (quota, panne), la veille France Travail est quand même enregistrée.
+      # s'il échoue (quota, panne), la veille France Travail est quand même enregistrée,
+      # et il tourne même si France Travail a échoué (le commit, lui, attend France Travail).
       - name: Extraire les offres Adzuna
+        if: ${{ !cancelled() }}          # même si l'étape France Travail a échoué
         continue-on-error: true
         env:
           ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
