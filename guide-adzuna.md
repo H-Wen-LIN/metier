@@ -48,6 +48,21 @@ Autres règles des CGU :
      ```
    - sur GitHub, dans Settings → Secrets and variables → Actions :
      `ADZUNA_APP_ID` et `ADZUNA_APP_KEY`.
+5. Vérifier que les clés marchent avec l'endpoint `version`, qui ne prend
+   aucun autre paramètre et ne compte que pour un appel :
+   ```bash
+   curl -s "https://api.adzuna.com/v1/api/version?app_id=$ADZUNA_APP_ID&app_key=$ADZUNA_APP_KEY&content-type=application/json"
+   ```
+   Réponse attendue :
+   ```json
+   { "__CLASS__": "Adzuna::API::Response::Version", "api_version": 1, "software_version": "2013111200" }
+   ```
+   Si les clés sont fausses, l'API répond `401` avec `"exception": "AUTH_FAIL"`.
+
+   ⚠️ La page « API Version » de la documentation donne l'URL
+   `…/v1/api/jobs/gb/version`. Elle est périmée : testée le 06/10/2026, elle
+   répond `404 UNKNOWN_METHOD`. La bonne URL, conforme à la spécification
+   OpenAPI, est `…/v1/api/version`, sans `jobs/<pays>`.
 
 ## 2. Les quotas gratuits
 
@@ -233,7 +248,7 @@ garde la version France Travail, qui est complète et porte un code ROME.
 | `GET /jobs/fr/top_companies` | les employeurs qui publient le plus | idem |
 | `GET /jobs/fr/geodata` | le nombre d'offres par zone | idem |
 | `GET /jobs/fr/history` | le salaire moyen mois par mois | idem |
-| `GET /version` | la version de l'API | — |
+| `GET /version` (à la racine `…/v1/api/version`, pas sous `jobs/fr/`) | la version de l'API | sert à tester les clés (§ 1) |
 
 Ces endpoints répondent directement aux questions du README (« où ? »,
 « combien ça paie ? », « qui recrute ? »). C'est un bon argument à mettre en
