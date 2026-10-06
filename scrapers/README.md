@@ -21,6 +21,20 @@ Un même CSV peut regrouper plusieurs recherches. Une offre n'est marquée `non 
 
 Les fichiers `mise-a-jour.bat` (Windows) et `mise-a-jour.sh` (Mac / Linux) lancent les deux scrapers en mode mise à jour. Chaque exécution ajoute son compte rendu dans `journal-mise-a-jour.log`.
 
+### Windows : installation en un double-clic
+
+1. Placez le dossier `scrapers` où vous voulez, par exemple dans `Documents`.
+2. Double-cliquez sur **`installer.bat`**. Il fait tout :
+   - il vérifie que Python 3 est installé (sinon il ouvre la page de téléchargement : installez-le en cochant « Add python.exe to PATH », puis relancez `installer.bat`) ;
+   - il installe les dépendances dans un dossier `.venv` ;
+   - il crée la tâche Windows **« Mise a jour des offres »**, lancée tous les jours à 9 h, et rattrapée au démarrage si l'ordinateur était éteint ;
+   - il fait une première récupération des offres et affiche le compte rendu.
+3. Les offres sont dans `jobijoba-scraper\data\offres.csv` et `wttj-scraper\data\offres_wttj.csv`.
+
+Chaque jour à 9 h, une fenêtre noire s'ouvre quelques minutes, puis se ferme toute seule : c'est la mise à jour. Pour l'arrêter, double-cliquez sur **`desinstaller.bat`** (vos CSV sont conservés). Pour changer l'heure, ouvrez le Planificateur de tâches (Windows + R, `taskschd.msc`) et modifiez la tâche « Mise a jour des offres ». Pour changer les recherches, modifiez `mise-a-jour.bat` (voir l'étape 2 ci-dessous).
+
+Les étapes 1 à 3 ci-dessous décrivent l'installation manuelle, utile sur Mac ou Linux.
+
 ### 1. Installer une fois
 
 Dans ce dossier `scrapers/` :

@@ -4,8 +4,13 @@ rem Modifiez les recherches ci-dessous : une ligne par commande, toujours avec -
 chcp 65001 >nul
 set PYTHONUTF8=1
 cd /d "%~dp0"
-set PY=%~dp0.venv\Scripts\python.exe
-set JOURNAL=%~dp0journal-mise-a-jour.log
+set "PY=%~dp0.venv\Scripts\python.exe"
+set "JOURNAL=%~dp0journal-mise-a-jour.log"
+if not exist "%PY%" (
+  echo Python n'est pas encore installe pour les scrapers : lancez d'abord installer.bat
+  if /i not "%~1"=="auto" pause
+  exit /b 1
+)
 echo ===== %date% %time% >> "%JOURNAL%"
 
 cd /d "%~dp0jobijoba-scraper"
@@ -14,4 +19,6 @@ cd /d "%~dp0jobijoba-scraper"
 cd /d "%~dp0wttj-scraper"
 "%PY%" scraper.py emploi-developpeur-web-paris-75000 --suivre 3 --mise-a-jour >> "%JOURNAL%" 2>&1
 
+cd /d "%~dp0"
 echo Mise a jour terminee. Details dans journal-mise-a-jour.log
+if /i not "%~1"=="auto" pause
