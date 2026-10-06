@@ -148,9 +148,13 @@ Endpoint : `GET /jobs/fr/search/{page}` (la page commence à 1).
 
 Ce qui **n'existe pas** : pas de code ROME, pas de code INSEE de commune, pas
 d'expérience demandée, pas de niveau de diplôme, pas d'alternance distincte.
-Les noms exacts des niveaux `location1` / `location2` pour la France et la
-liste des catégories ne sont visibles qu'avec une clé : les relever au premier
-appel (`location.area` d'une réponse, et `GET /jobs/fr/categories`).
+Pour la France, `location.area` suit la hiérarchie **pays → région →
+département → ville → quartier ou commune voisine**, constatée le 06/10/2026 :
+`["France", "Pays de la Loire", "Loire-Atlantique", "Nantes", "Saint-Herblain"]`.
+On peut donc filtrer un département avec
+`location0=France&location1=Auvergne-Rhône-Alpes&location2=Puy-de-Dôme`.
+Attention : certaines offres s'arrêtent à `["France"]`. La liste des catégories
+s'obtient avec `GET /jobs/fr/categories`.
 
 ## 5. Passer de nos codes ROME à des mots-clés
 
