@@ -17,9 +17,12 @@ Le rappel est pondéré par le plan de sondage : les offres « aucun dictionnair
 """
 import csv
 import math
+import sys
 from pathlib import Path
 
 ICI = Path(__file__).resolve().parent
+sys.path.insert(0, str(ICI.parent))
+from audit import repere  # noqa: E402  (les dictionnaires corrigés)
 VARIABLES = ["teletravail", "langue_etrangere", "orientation_commerciale", "horaires_atypiques"]
 SEUIL_KAPPA, SEUIL_PRECISION = 0.70, 0.85
 
@@ -115,6 +118,23 @@ def main():
                "Le rappel combine le taux de faux négatifs des 60 offres qu'aucun dictionnaire ne "
                f"repère (pondérées par {n_aucun}) et celui des offres repérées par un autre "
                "dictionnaire ; avec si peu de faux négatifs attendus, son incertitude est grande."]
+
+    # 3. Les dictionnaires corrigés, sur le même échantillon : estimation optimiste, puisqu'ils
+    # ont été corrigés en lisant ces erreurs (le contrôle hors échantillon est dans PROTOCOLE.md).
+    textes = {int(r["num"]): r["intitule"] + " " + r["description"] for r in lire("a_coder/echantillon.csv")}
+    lignes += ["", "## 3. Après correction (même échantillon : estimation optimiste)", "",
+               "| Variable | Vrais positifs | Faux positifs | Faux négatifs | Précision | Rappel (non pondéré) |",
+               "|---|---|---|---|---|---|"]
+    for v in ("teletravail",):
+        p = {n: int(repere(v, textes[n])) for n in nums}
+        vp = sum(p[n] and reference[v][n] for n in nums)
+        fp = sum(p[n] and not reference[v][n] for n in nums)
+        fn = sum(not p[n] and reference[v][n] for n in nums)
+        lignes.append(f"| `{v}` v2 | {vp} | {fp} | {fn} | {pc(vp / max(vp + fp, 1))} | {pc(vp / max(vp + fn, 1))} |")
+    lignes += ["", "`orientation_commerciale` n'a pas de version corrigée : un dictionnaire large "
+               "(vente, vendre, négocier, prospect, développement commercial…) atteint 96 % de rappel "
+               "mais 70 % de précision sur cet échantillon. Le concept ne se lit pas dans les mots : "
+               "il se code par lecture."]
     (ICI / "resultats.md").write_text("\n".join(lignes) + "\n", encoding="utf-8")
     print("\n".join(lignes))
 

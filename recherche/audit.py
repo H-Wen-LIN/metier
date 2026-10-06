@@ -27,17 +27,31 @@ from resumer import exp_ans, salaire_min_max  # noqa: E402  (mêmes règles que 
 
 IDF = {"75", "77", "78", "91", "92", "93", "94", "95"}
 
-# Dictionnaires candidats, à valider par double codage humain (kappa) avant toute confirmation.
+# Dictionnaires sur l'intitulé + la description. Chaque entrée : (motif repéré, motif qui annule).
+# Validés par le double codage de 120 offres (recherche/codage/resultats.md) :
+#   teletravail (v2), langue_etrangere, horaires_atypiques : utilisables ;
+#   orientation_commerciale : NON utilisable (rappel 26 %, et 70 % de précision au mieux) :
+#     cette variable se code par lecture, avec la grille recherche/codage/a_coder/CODEBOOK.md ;
+#   outil_crm_nomme, centre_appels : non validés, prévalence descriptive seulement.
 DICTIONNAIRES = {
-    "teletravail": r"t[ée]l[ée][- ]?travail|remote|hybride",
-    "teletravail_nie": r"(pas de|sans|aucun) t[ée]l[ée][- ]?travail|t[ée]l[ée][- ]?travail (non|impossible)",
-    "langue_etrangere": r"\banglais\b|english|bilingue|espagnol|allemand|italien|n[ée]erlandais|portugais",
-    "orientation_commerciale": r"objectifs? (commerciaux|de vente|chiffr[ée]s?)|prospect|t[ée]l[ée]vente"
-                               r"|vente additionnelle|appels? sortants|outbound|upsell|cross[- ]sell",
-    "outil_crm_nomme": r"salesforce|zendesk|hubspot|dynamics|freshdesk|zoho|genesys|odigo",
-    "horaires_atypiques": r"samedi|week-end|weekend|dimanche",
-    "centre_appels": r"centre d'appels?|call[- ]cent|centre de contact|plateau t[ée]l[ée]phonique",
+    # v2 : « hybride » seul repérait les véhicules hybrides ; « pas de télétravail possible » était
+    # compté ; « Smart Working » et « travail à domicile » étaient manqués.
+    "teletravail": (r"t[ée]l[ée][- ]?travail|remote|smart[- ]?working|travail (à|a) (domicile|distance)"
+                    r"|(travail|poste|mode|organisation|rythme|format) hybride|en hybride",
+                    r"(pas de|sans|aucun|non) t[ée]l[ée][- ]?travail|t[ée]l[ée][- ]?travail (non|impossible|exclu)"),
+    "langue_etrangere": (r"\banglais\b|english|bilingue|espagnol|allemand|italien|n[ée]erlandais|portugais", None),
+    "horaires_atypiques": (r"samedi|week-end|weekend|dimanche", None),
+    "outil_crm_nomme": (r"salesforce|zendesk|hubspot|dynamics|freshdesk|zoho|genesys|odigo", None),
+    "centre_appels": (r"centre d'appels?|call[- ]cent|centre de contact|plateau t[ée]l[ée]phonique", None),
 }
+
+
+def repere(nom, texte):
+    """1 si le dictionnaire repère le texte (motif trouvé, et pas de motif qui l'annule)."""
+    motif, annule = DICTIONNAIRES[nom]
+    return re.search(motif, texte, re.IGNORECASE) is not None and not (
+        annule and re.search(annule, texte, re.IGNORECASE))
+
 
 
 def charger(rome, jusquau):
@@ -140,10 +154,9 @@ def main():
               "des offres qui en listent (modèle pré-rempli du formulaire)")
 
     # 4. Variables tirées du texte : prévalence seulement.
-    print("\n## Dictionnaires sur l'intitulé + la description (prévalence, à valider)\n")
-    for nom, motif in DICTIONNAIRES.items():
-        rx = re.compile(motif, re.IGNORECASE)
-        print(f"{nom:25s}", pct(sum(bool(rx.search(o["intitule"] + " " + o["description"])) for o in d), n))
+    print("\n## Dictionnaires sur l'intitulé + la description (prévalence)\n")
+    for nom in DICTIONNAIRES:
+        print(f"{nom:25s}", pct(sum(repere(nom, o["intitule"] + " " + o["description"]) for o in d), n))
 
     # 5. Indépendance des observations.
     employeurs = Counter((o.get("entreprise") or {}).get("nom") for o in d if rempli(o, "entreprise"))

@@ -60,3 +60,13 @@ num,id,teletravail,langue_etrangere,orientation_commerciale,horaires_atypiques,d
 - `teletravail` … `horaires_atypiques` : 0 ou 1.
 - `doute` : 1 si au moins une des quatre variables vous a fait hésiter, sinon 0.
 - `note` : vide, ou une phrase courte. Pour chaque variable codée 1, donnez l'extrait de l'offre qui le justifie, entre guillemets, en moins de 15 mots. Pensez à mettre le champ entre guillemets doubles s'il contient des virgules.
+
+---
+
+## Précision ajoutée après le double codage du 06/10/2026
+
+*Les deux codeurs n'ont pas eu cette section. Elle fixe la règle appliquée pour départager leurs 9 désaccords sur `orientation_commerciale` (voir `../arbitrage.csv`). Elle vaut pour tout codage ultérieur.*
+
+- `orientation_commerciale` = **1** quand le poste **génère ou convertit lui-même des ventes** : négocier des conditions commerciales, relancer des devis ou des offres, développer l'activité commerciale, travailler des prospects, vendre.
+- `orientation_commerciale` = **0** quand le poste **traite** des demandes : établir un devis ou une offre à la demande, enregistrer des commandes, « proposer les produits et services adaptés » sans vente ni objectif nommés, participer « occasionnellement » à une négociation menée par un commercial.
+- `horaires_atypiques` = **1** quand l'offre annonce plus de 5 jours travaillés par semaine (« 35 h sur 6 jours ») : un jour du week-end en fait forcément partie.

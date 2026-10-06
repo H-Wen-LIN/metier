@@ -1,0 +1,11 @@
+num,variable,valeur,raison
+2,orientation_commerciale,1,"« Négocier les conditions commerciales avec les clients existants » : le poste mène lui-même une négociation commerciale"
+8,orientation_commerciale,0,"Back office SAV : établir les offres et enregistrer les commandes (administration des ventes) ; négociations seulement « occasionnellement », aux côtés du commercial"
+51,orientation_commerciale,0,"Traitement et suivi des demandes et des commandes ; « démarche commerciale » qualifie la manière, aucune vente ni objectif"
+68,orientation_commerciale,0,"« Proposer les produits et services adaptés » sans vente ni objectif nommés (règle de la grille : explicite)"
+82,orientation_commerciale,0,"Conseil et devis à la demande des clients de l'atelier, facturation : traitement, pas conversion"
+99,orientation_commerciale,1,"Mission « Participer au développement de l'activité commerciale après-vente », « qualités commerciales », primes sur objectif"
+101,orientation_commerciale,1,"Grands comptes : « suivi commercial des affaires », « Relancer les offres et devis », pipeline de vente : le poste convertit des ventes"
+109,orientation_commerciale,0,"« Proposer les produits et services adaptés » sans vente ni objectif nommés (même décision que n°68)"
+111,orientation_commerciale,1,"« Contribuerez activement au développement commercial », appels sortants de qualification de prospects, suivi des opportunités"
+104,horaires_atypiques,1,"« 35h sur 6 jours travaillés » : six jours de travail par semaine incluent forcément un jour du week-end"

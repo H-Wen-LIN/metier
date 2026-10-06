@@ -30,7 +30,7 @@ Conséquence : ces données ne manquent pas au hasard. L'absence dépend du cana
 
 **2. Le salaire bute sur un plancher.** Le plus petit taux horaire affiché est 12,31 € ; ramené à 35 h (× 151,67), il donne 1 867 € par mois, soit 22 405 € par an. C'est le SMIC en vigueur (montant à vérifier sur le décret de revalorisation). 29 % des salaires mensuels et 70 % des salaires horaires affichés (hors alternance) sont à moins de 2 % de ce plancher. La distribution est tronquée à gauche par la loi et présente un pic au SMIC. Cela exclut les tests qui supposent la normalité, donne un rôle central à la médiane et aux quantiles, et suggère un modèle censuré (Tobit) en contrôle de robustesse.
 
-**3. La conversion du site crée un faux écart.** `scripts/resumer.py` multiplie un salaire horaire par 1 607 h (heures travaillées) mais un salaire mensuel par 12 (soit 151,67 h × 12 = 1 820 h payées, congés compris). Au même SMIC, l'horaire donne 19 782 € et le mensuel 22 405 €, soit **−11,7 %**. L'horaire est surreprésenté dans l'intérim (15 offres sur 38 intérims qui affichent un salaire, contre 16 sur 142 en CDI). Sans correction, on « trouverait » un salaire plus bas en intérim qui n'est qu'un artefact de conversion. **Règle de ce protocole : horaire × 1 820.**
+**3. La conversion du site crée un faux écart.** `scripts/resumer.py` multiplie un salaire horaire par 1 607 h (heures travaillées) mais un salaire mensuel par 12 (soit 151,67 h × 12 = 1 820 h payées, congés compris). Au même SMIC, l'horaire donne 19 782 € et le mensuel 22 405 €, soit **−11,7 %**. L'horaire est surreprésenté dans l'intérim (15 offres sur 38 intérims qui affichent un salaire, contre 16 sur 142 en CDI). Sans correction, on « trouverait » un salaire plus bas en intérim qui n'est qu'un artefact de conversion. **Règle de ce protocole : horaire × 1 820.** *Corrigé dans `scripts/resumer.py` le 06/10/2026 : le site l'applique dès l'extraction suivante, et le TD 1 a été refait sur l'instantané du 29/09 (médiane 23 600 → 24 006 €, 1er quartile 20 000 → 22 404 €, soit exactement le SMIC annuel).*
 
 ### 1.2 Variables, une par une
 
@@ -62,8 +62,8 @@ Taux de remplissage sur les 561 offres d'exploration. « Recodage » renvoie à 
 | Intermédiation | binaire | recodage : NAF 78 ou contrat MIS | — | variable propre, plus fiable que le secteur |
 | Taille de l'établissement (`trancheEffectifEtab`) | qualitative ordinale (11 tranches) | regroupée en 5 classes | 49 % (canal FT) | taille de l'**établissement**, pas de l'entreprise ; pour une agence, taille de l'agence ; « 0 salarié » ambigu (33 offres) |
 | Localisation (`lieuTravail`) | nominale (département) | recodage : Île-de-France oui/non ; région | 97 % ; 140 offres en Île-de-France (25 %) | lieu de l'offre, parfois le siège ; 15 offres « France » |
-| Télétravail | binaire | dictionnaire sur la description (le site lit seulement le mot « télétravail ») | 8,4 % (47) | mention ≠ droit : « possible après la période d'essai », « 1 jour par mois » ; aucune négation détectée, à vérifier à la main |
-| Orientation commerciale | binaire | dictionnaire (objectifs de vente, prospection, télévente, appels sortants…) | 18,4 % (103) | à valider ; même texte que d'autres variables tirées de la description |
+| Télétravail | binaire | dictionnaire v2, **validé** (§1.3) ; le site, lui, lit seulement le mot « télétravail » | 6,9 % (39 sur 565) | la v1 comptait les véhicules « hybrides » et « pas de télétravail possible » (8,4 %) ; mention ≠ droit : « possible après la période d'essai » |
+| Orientation commerciale | binaire | **codage par lecture** avec la grille `recherche/codage/a_coder/CODEBOOK.md` ; le dictionnaire est **rejeté** (§1.3) | ≈ 46 % (55 sur 120 à la lecture, pondéré par le plan de tirage) | frontière floue entre conseil et vente : la règle d'arbitrage est écrite dans la grille |
 | Horaires atypiques | binaire | dictionnaire (samedi, week-end, dimanche) + `contexteTravail.horaires` | 10,7 % | — |
 | Offre manquant de candidats (`offresManqueCandidats`) | binaire | direct, canal FT | 32 vraies sur 225 | **définition non documentée** : calculée pour l'offre ou pour le métier × territoire ? À établir avant tout usage |
 | Nombre de postes (`nombrePostes`) | quantitative discrète | **non** | 552 offres sur 561 valent 1 | pas de variance |
@@ -81,6 +81,17 @@ Taux de remplissage sur les 561 offres d'exploration. « Recodage » renvoie à 
 - **Qualification** : employé non qualifié < employé qualifié < technicien ou agent de maîtrise ; ouvriers, manœuvres et cadres exclus (moins de 5 % des offres).
 - **Taille** : 0-9 / 10-49 / 50-199 / 200-499 / 500 et plus ; « 0 salarié » et NAF 78 exclus.
 - **Dictionnaires** : expressions régulières de `recherche/audit.py`. Avant l'échantillon de confirmation, on tire 120 offres d'exploration (60 positives, 60 négatives selon le dictionnaire). Deux codeurs les lisent sans voir le résultat du dictionnaire, puis on calcule le κ de Cohen entre codeurs et la précision / le rappel du dictionnaire. Seuil : κ ≥ 0,70 et précision ≥ 0,85. Sinon, on corrige le dictionnaire sur l'exploration, jamais sur la confirmation.
+  **Fait le 06/10/2026** (`recherche/codage/`, résultats complets dans `resultats.md`). 120 offres tirées parmi les 477 descriptions distinctes (15 repérées par chaque dictionnaire, 60 repérées par aucun), codées à l'aveugle par deux codeurs. Les 10 désaccords ont été tranchés une à une, avec leur raison, dans `arbitrage.csv`.
+
+  | Variable | κ entre codeurs | Précision du dictionnaire v1 | Rappel pondéré | Décision |
+  |---|---|---|---|---|
+  | télétravail | 1,00 | 81 % | 81 % | corrigé (v2) : 0 erreur sur l'échantillon ; hors échantillon, la v2 ne change que 3 des 368 autres offres, et les 3 changements sont justes |
+  | langue étrangère | 1,00 | 100 % | 100 % | gardé |
+  | horaires atypiques | 0,97 | 92 % | 90 % | gardé |
+  | orientation commerciale | 0,85 | 69 % | **26 %** | **dictionnaire rejeté** : un dictionnaire large atteint 96 % de rappel mais 70 % de précision. La grille fonctionne (κ = 0,85), pas les mots-clés : la variable se code par lecture |
+
+  **Limites de cette validation.** Les deux codeurs sont des agents Claude, lancés séparément, avec deux modèles différents. Ils n'ont lu que la grille et le texte des offres. Deux instances de modèles proches peuvent pourtant se tromper de la même façon, si bien que leur κ surestime peut-être l'accord qu'auraient deux humains. Les κ de 1,00 sur des variables faciles ne disent rien de plus. L'arbitre (Claude, dans la session principale) connaissait le résultat des dictionnaires. **À faire par une personne** : recoder à la main 30 des 120 offres (dont les 29 marquées « doute » par le codeur A en priorité) et calculer son κ avec la référence. En dessous de 0,70 sur une variable, cette variable n'est pas validée.
+
   *Exemple de ce que la validation attrape : une première version du dictionnaire « outil CRM nommé » cherchait `sage` ; elle comptait 21 % des offres, à cause de « repassage », « passage en caisse », « apprentissage ». Corrigée, elle en compte 1,2 %.*
 - **Unité d'analyse** : l'offre. Les doublons stricts (même intitulé, même employeur, même lieu) sont retirés comme au TD 1. Les offres d'un même employeur restent, avec des erreurs-types groupées par employeur (*cluster* = nom de l'employeur ; employeur anonyme = groupe par empreinte de la description).
 
@@ -421,10 +432,10 @@ Flux observé : 15,2 nouvelles offres D1415 par jour, soit **≈ 1 380 en 13 sem
 2. **H0** : OR = 1 entre orientation commerciale et rémunération variable.
 3. **H1** : OR ≠ 1 (attendu : > 1).
 4. **Variables** : description (X), `salaire.listeComplements` et `salaire.commentaire` (Y) ; canal FT.
-5. **Codage** : X selon le dictionnaire `orientation_commerciale`, **validé** (§1.3). Y tiré **seulement des champs structurés du salaire**, jamais de la description, pour que X et Y ne soient pas lus dans le même paragraphe (biais de méthode commune).
+5. **Codage** : X **codé par lecture** avec la grille (le dictionnaire a été rejeté, §1.3) : un codeur sur toutes les offres du canal FT de l'échantillon de confirmation (≈ 535), un second, à l'aveugle, sur 20 % d'entre elles tirées au hasard, κ rapporté ; κ < 0,70 = résultat de H6 non interprétable. Y tiré **seulement des champs structurés du salaire**, jamais de la description, pour que X et Y ne soient pas lus dans le même paragraphe (biais de méthode commune).
 6. **Test** : Khi² 2 × 2 (Fisher si un effectif attendu est < 5) ; puis logit avec contrat, taille, agence.
 7. **Conditions** : effectifs attendus ; au moins 10 événements par paramètre dans le logit.
-8. **n souhaitable** : avec ≈ 18 % d'offres commerciales et ≈ 535 offres FT, ≈ 95 exposées : on détecte un OR de l'ordre de 2. En dessous, la réponse sera « non concluant ».
+8. **n souhaitable** : le dictionnaire annonçait 18 % d'offres commerciales ; la lecture en trouve **≈ 46 %** (estimation pondérée par le plan de tirage). Avec ≈ 535 offres FT, les deux groupes sont donc proches de l'équilibre, ce qui donne une meilleure puissance que prévu : un OR de l'ordre de 1,7 devient détectable.
 9. **Effet** : OR et différence de proportions avec IC.
 10. **Contrôles** : contrat, taille, agence.
 11. **Biais** : « Primes » mêle prime d'objectif et 13e mois, ce qui ajoute du bruit et pousse vers une absence d'effet ; erreurs du dictionnaire (d'où la validation).
@@ -468,9 +479,9 @@ Flux observé : 15,2 nouvelles offres D1415 par jour, soit **≈ 1 380 en 13 sem
 
 ### 8.3 Ce qu'il reste à faire, dans l'ordre
 
-1. **Corriger la conversion horaire** (× 1 820) ou, au minimum, la recalculer dans le script d'analyse. Sinon, H1 est biaisée d'avance.
+1. ~~Corriger la conversion horaire~~ : **fait** le 06/10/2026 (`scripts/resumer.py`, × 1 820).
 2. **Établir la définition de `offresManqueCandidats`** dans la documentation de l'API avant d'envisager H14.
-3. **Double codage** de 120 offres d'exploration pour les dictionnaires (télétravail, orientation commerciale, horaires atypiques, langues), puis gel des dictionnaires.
+3. ~~Double codage de 120 offres~~ : **fait** le 06/10/2026 (§1.3). Dictionnaires gelés dans `recherche/audit.py` : télétravail v2, langue étrangère, horaires atypiques. Orientation commerciale : codage par lecture. **Reste** : le contre-codage humain de 30 offres.
 4. **Collecter** jusqu'au 05/01/2027 sans regarder les croisements. On peut contrôler la seule chose qui ne biaise pas les tests : que la collecte tourne et que les effectifs montent (`recherche/audit.py`).
 5. **Écrire le script d'analyse confirmatoire avant le 05/01/2027**, puis l'exécuter une fois.
 6. **Rapporter tout** : les 9 tests, les effets, les IC, y compris les résultats non significatifs et les cas « non concluants ».

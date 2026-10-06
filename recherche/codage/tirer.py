@@ -24,9 +24,18 @@ from pathlib import Path
 
 ICI = Path(__file__).resolve().parent
 sys.path.insert(0, str(ICI.parent))
-from audit import DICTIONNAIRES, charger  # noqa: E402
+from audit import charger  # noqa: E402
 
 VARIABLES = ["teletravail", "langue_etrangere", "orientation_commerciale", "horaires_atypiques"]
+# Les dictionnaires tels qu'ils étaient au tirage (v1) : figés ici pour que le tirage se refasse
+# à l'identique. Les versions corrigées vivent dans recherche/audit.py.
+DICTIONNAIRES = {
+    "teletravail": r"t[ée]l[ée][- ]?travail|remote|hybride",
+    "langue_etrangere": r"\banglais\b|english|bilingue|espagnol|allemand|italien|n[ée]erlandais|portugais",
+    "orientation_commerciale": r"objectifs? (commerciaux|de vente|chiffr[ée]s?)|prospect|t[ée]l[ée]vente"
+                               r"|vente additionnelle|appels? sortants|outbound|upsell|cross[- ]sell",
+    "horaires_atypiques": r"samedi|week-end|weekend|dimanche",
+}
 PAR_DICTIONNAIRE, NEGATIVES, GRAINE = 15, 60, 20261006
 
 
