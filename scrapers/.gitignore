@@ -1,0 +1,6 @@
+# Données et journaux des mises à jour : jamais versionnés
+data/
+*.csv
+*.tmp
+*.log
+.venv/

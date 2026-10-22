@@ -1,0 +1,10 @@
+# Données récupérées (ne pas publier)
+data/
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
