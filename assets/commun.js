@@ -77,7 +77,7 @@ const SOURCES = ["France Travail", "Adzuna", "Welcome to the Jungle"];
 const srcOffre = o => o.source || "France Travail";
 const EXPS = ["Débutant accepté", "Moins d'un an", "1 à 2 ans", "3 à 4 ans", "5 ans et plus", "Non précisé"];
 
-Chart.defaults.font.family = "system-ui, -apple-system, 'Segoe UI', sans-serif";
+Chart.defaults.font.family = "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif"; Chart.defaults.color = "#5b6478";
 Chart.defaults.plugins.legend.display = false;
 
 let D, graphiques = {};
@@ -314,11 +314,8 @@ function poserNavEtFiltres() {
     `<a href="${url}"${url === PAGE_ICI ? ' class="ici" aria-current="page"' : ""}>${lib}</a>`).join("") + `</nav>`;
 
   const f = document.getElementById("filtres-ici");
-  if (f) f.outerHTML = (PAGE_ICI === "index.html"
-    // Accueil : le panneau est déplié, c'est le point de départ.
-    ? `<div class="carte">${HTML_FILTRES}</div>`
-    // Ailleurs : replié, on vient lire une page, pas refaire ses filtres.
-    : `<details class="carte"><summary id="resume-filtres">Filtres</summary>${HTML_FILTRES}</details>`)
+  // Replié partout, y compris l'accueil : les chiffres passent avant le réglage ; le résumé dit l'état des filtres.
+  if (f) f.outerHTML = `<details class="carte"><summary id="resume-filtres">Filtres</summary>${HTML_FILTRES}</details>`
     + `<div class="vide" id="aucune" hidden>Aucune offre ne correspond à ces filtres. Recochez un métier, un type de contrat ou un niveau de poste, ou décochez un critère de qualité.</div>`;
 
   const p = document.getElementById("pied");
