@@ -77,7 +77,7 @@ const SOURCES = ["France Travail", "Adzuna", "Welcome to the Jungle"];
 const srcOffre = o => o.source || "France Travail";
 const EXPS = ["Débutant accepté", "Moins d'un an", "1 à 2 ans", "3 à 4 ans", "5 ans et plus", "Non précisé"];
 
-Chart.defaults.font.family = "system-ui, -apple-system, 'Segoe UI', sans-serif";
+Chart.defaults.font.family = "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif"; Chart.defaults.color = "#5b6478";
 Chart.defaults.plugins.legend.display = false;
 
 let D, graphiques = {};
